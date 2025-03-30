@@ -1,0 +1,321 @@
+Wireframes Iniciales para la UX/UI de la App
+1. Pantalla de Inicio (Ubicación Obligatoria)
+Solicitud de permisos de ubicación.
+
+
+Opción de ingresar ubicación manualmente.
+
+
+Botón para continuar a la home.
+
+
+2. Home
+Sección de banners animados con eventos destacados.
+
+
+Recomendaciones personalizadas (artistas y eventos según la ubicación).
+
+
+Entradas de blog con noticias y consejos.
+
+
+Sección de tienda con productos de los artistas.
+
+
+3. Buscador Avanzado
+Barra de búsqueda con filtros:
+
+
+Categorías/Subcategorías.
+
+
+Rango de precios ($50,000 - $5,000,000).
+
+
+Ubicación configurable.
+
+
+Botón de búsqueda avanzada.
+
+
+4. Perfil de Usuario
+Foto de perfil y galería de imágenes estilo Instagram.
+
+
+Bio y clasificación por rol (Músico, Productor, etc.).
+
+
+Calendario de disponibilidad.
+
+
+Lista de servicios con precios.
+
+
+5. Explorador de Artistas y Eventos
+Tarjetas tipo Tinder Swipe:
+
+
+Deslizar a la derecha para guardar en favoritos.
+
+
+Deslizar a la izquierda para descartar.
+
+
+Botón de alternar entre artistas y eventos.
+
+
+6. Favoritos
+Dos pestañas:
+
+
+Artistas guardados.
+
+
+Eventos guardados.
+
+
+Opciones para comparar precios.
+
+
+7. Carga de Eventos
+Opción de elegir entre evento presencial o evento virtual.
+
+
+Campos obligatorios:
+
+
+Nombre del evento.
+
+
+Fecha y hora.
+
+
+Descripción breve.
+
+
+Imagen destacada.
+
+
+Precio (o marcar como gratuito).
+
+
+Para eventos presenciales: integración con Google Maps.
+
+
+Para eventos virtuales: enlace web.
+
+
+8. Oferta en Tiempo Real
+Formulario para que el cliente publique una solicitud de servicio.
+
+
+La oferta llega a artistas de la categoría seleccionada.
+
+
+Los artistas pueden aceptar o contraofertar.
+
+
+9. Chat
+Solo habilitado para usuarios que hicieron match.
+
+
+Restricción para evitar compartir números de contacto.
+
+
+Notificaciones en tiempo real.
+
+
+10. Configuración de Cuenta
+Edición de perfil.
+
+
+Gestión de órdenes (Reservada, En curso, Pagada).
+
+
+Métodos de pago.
+
+
+Notificaciones.
+
+
+Configuración de idioma.
+
+
+Términos y políticas.
+
+
+Soporte técnico.
+
+
+subir articulos fisicos
+
+
+Flujo de Usuario para la UX/UI de la App
+1. Pantalla de Inicio (Ubicación Obligatoria)
+Flujo de Usuario:
+El usuario abre la app por primera vez.
+
+
+Se solicita acceso a la ubicación (puede aceptar o ingresar manualmente).
+
+
+Una vez confirmada, se redirige al Home.
+
+
+2. Home
+Flujo de Usuario:
+Al ingresar, el usuario ve banners animados con eventos destacados.
+
+
+Puede explorar recomendaciones de artistas y eventos según su ubicación.
+
+
+Puede desplazarse por entradas de blog y la tienda.
+
+
+Puede acceder al menú para navegar a otras secciones.
+
+
+3. Buscador Avanzado (Explorador de Artistas)
+Flujo de Usuario:
+El usuario ingresa al buscador desde el explorador de artistas.
+
+
+Introduce filtros:
+
+
+Categoría y subcategoría.
+
+
+Rango de precios ($50,000 - $5,000,000).
+
+
+Ubicación configurable.
+
+
+Fecha de disponibilidad.
+
+
+Pulsa buscar y se muestran los resultados.
+
+
+Puede seleccionar un artista/evento para ver su perfil o detalles.
+
+
+4. Perfil de Usuario
+Flujo de Usuario:
+El usuario accede a su perfil desde el menú o desde un resultado de búsqueda.
+
+
+Puede visualizar la galería de fotos, bio y clasificación del artista.
+
+
+Puede consultar el calendario de disponibilidad.
+
+
+Puede ver la lista de servicios con precios y contactar al artista.
+
+
+Puede subir artículos físicos como libros, pinturas y otros productos para la tienda.
+
+
+5. Explorador de Artistas y Eventos
+Flujo de Usuario:
+El usuario accede al explorador desde el menú o desde la home.
+
+
+Se presentan tarjetas tipo Tinder Swipe:
+
+
+Deslizar a la derecha: guarda en favoritos.
+
+
+Deslizar a la izquierda: descarta.
+
+
+Puede alternar entre artistas y eventos.
+
+
+Si encuentra algo interesante, puede ver más detalles o contactar.
+
+
+6. Favoritos
+Flujo de Usuario:
+El usuario accede a la sección de favoritos.
+
+
+Puede cambiar entre las pestañas de "Artistas Guardados" y "Eventos Guardados".
+
+
+Puede comparar precios y ver detalles antes de tomar una decisión.
+
+
+7. Carga de Eventos
+Flujo de Usuario:
+El usuario accede a la opción de crear un evento.
+
+
+Selecciona entre evento presencial o virtual.
+
+
+Completa los datos obligatorios:
+
+
+Nombre, fecha, hora, descripción, imagen, precio.
+
+
+Si es presencial: dirección con Google Maps.
+
+
+Si es virtual: enlace web.
+
+
+Publica el evento y este queda visible en el explorador.
+
+
+8. Oferta en Tiempo Real
+Flujo de Usuario:
+Un cliente publica una solicitud de servicio.
+
+
+La oferta llega a los artistas de la categoría seleccionada.
+
+
+Los artistas pueden aceptar o contraofertar.
+
+
+Si hay acuerdo, se genera una orden de servicio.
+
+
+9. Chat
+Flujo de Usuario:
+Se habilita solo entre usuarios que hicieron match.
+
+
+Pueden intercambiar mensajes pero sin compartir números de contacto.
+
+
+Se generan notificaciones en tiempo real.
+
+
+Se puede consultar el historial de chats desde el menú.
+
+
+10. Configuración de Cuenta
+Flujo de Usuario:
+El usuario accede a la configuración desde el menú.
+
+
+Puede editar su perfil y gestionar órdenes.
+
+
+Puede configurar métodos de pago y notificaciones.
+
+
+Puede cambiar el idioma y acceder a términos y soporte.
+
+
+Puede cambiar entre modo oscuro y claro.
+
+
+
