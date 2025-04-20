@@ -9,10 +9,7 @@ import {
   getDoc,
   query,
   where,
-  orderBy,
-  limit,
-  Timestamp,
-  GeoPoint 
+  Timestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";

@@ -9,7 +9,7 @@ import HomePage from "@/pages/home";
 import ExplorerPage from "@/pages/explorer";
 import ArtistProfilePage from "@/pages/artist-profile";
 import CreateArtistProfilePage from "@/pages/create-artist-profile";
-import ProfilePage from "@/pages/profile";
+import ProfilePage from "@/pages/profile/profile";
 import FavoritesPage from "@/pages/favorites";
 import ChatPage from "@/pages/chat";
 import EventDetailsPage from "@/pages/event-details";

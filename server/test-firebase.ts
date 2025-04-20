@@ -1,7 +1,5 @@
-
-import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { db } from './db.js';
+import { Timestamp } from 'firebase-admin/firestore';
+import { db } from './db'; // Cambiado a './db' (sin .js)
 
 const testFirebaseConnection = async () => {
   try {

@@ -13,7 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const headers: Record<string, string> = {
-    ...(data && { "Content-Type": "application/json" }),
+    ...(data ? { "Content-Type": "application/json" } : {}),
   };
 
   const auth = await import('firebase/auth');
