@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
-import { storage } from './storage';
+// Ensure the storage module exists or replace it with a valid implementation
+import { storage } from './storage'; // Verify './storage' exists or implement it
 
 interface ChatMessage {
   type: 'chat_message';
@@ -168,7 +169,7 @@ export function setupWebSocketServer(httpServer: Server) {
     }
   });
   
-  async function handleChatMessage(data: ChatMessage, senderId: string) {
+  async function handleChatMessage(data: ChatMessage, clientId: string) {
     try {
       // Save message to database
       const newMessage = await storage.createMessage({
