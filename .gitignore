@@ -1,6 +1,3 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+node_modules/
+.env
+*.json  # Excluye todos los archivos JSON (o pon el nombre exacto de tu archivo de credenciales)
