@@ -38,7 +38,6 @@ export type OrderStatus = 'pending' | 'accepted' | 'rejected' | 'delivered' | 'a
 
 export type OrderStatusLabel = 'Pendiente' | 'Aceptada' | 'Rechazada' | 'Cancelada' | 'Completada';
 
-
 export interface OrderItem {
   id: string;
   artworkId: string;
@@ -90,10 +89,12 @@ export interface OrderCreateForm {
   }>;
   deliveryAddress: string;
 }
+
 export interface OrderUpdateForm {
   status: OrderStatus;
   specialRequests?: string;
 }
+
 export interface EventFormValues {
   name: string;
   date: string;
@@ -110,4 +111,42 @@ export interface EventFormValues {
   price?: number;
   category?: string;
   tags?: string[];
+}
+
+// ==================== 5. PERFIL DE ARTISTA ====================
+
+// Información básica del perfil artístico
+export interface ArtistProfileForm {
+  userId: string;
+  category: string;
+  subcategory: string;
+  description: string;
+  minPrice: number;
+  maxPrice: number;
+  priceUnit: 'hora' | 'evento' | 'día';
+  media: MediaItem[];
+  services: ArtistService[];
+  availability: AvailabilityDate[];
+}
+
+// Servicio que el artista puede ofrecer
+export interface ArtistService {
+  id: string; // ID local o del backend
+  title: string;
+  description: string;
+  price: number;
+  videoUrl?: string;
+}
+
+// Imagen o video subido por el artista
+export interface MediaItem {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+}
+
+// Fechas de disponibilidad del artista
+export interface AvailabilityDate {
+  date: string; // Formato ISO: 'YYYY-MM-DD'
+  available: boolean; // true = disponible, false = ocupado
 }

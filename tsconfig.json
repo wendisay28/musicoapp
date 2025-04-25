@@ -37,12 +37,14 @@
     "paths": {
       "@/*": ["client/src/*"],
       "@shared/*": ["client/src/shared/*"],
-      "@profile/*": ["client/src/pages/profile/*"],
+      "@profile/*": ["client/src/pages/ProfileArt/profile/*"],
       "@components/*": ["client/src/components/*"],
       "@hooks/*": ["client/src/hooks/*"],
       "@lib/*": ["client/src/lib/*"],
       "@assets/*": ["client/src/assets/*"],
-      "@types/*": ["client/src/types/*"]
+      "@types/*": ["client/src/types/*"],
+      "@pages/*": ["client/src/pages/*"],
+      "@features/*": ["client/src/features/*"]
     },
     "types": ["node"],
     "typeRoots": [
