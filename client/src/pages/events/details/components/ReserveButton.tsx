@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 
 interface ReserveButtonProps {
   eventId: string;
-  userId: string;
   isOrganizer: boolean;
   alreadyReserved: boolean;
   onSuccess: () => void;
@@ -14,7 +13,6 @@ interface ReserveButtonProps {
 
 export function ReserveButton({
   eventId,
-  userId,
   isOrganizer,
   alreadyReserved,
   onSuccess,
@@ -28,7 +26,7 @@ export function ReserveButton({
     setLoading(true);
     setError("");
     try {
-      await reserveTicket({ eventId, userId });
+      await reserveTicket({ eventId });
       onSuccess();
     } catch (err) {
       setError("Hubo un error al reservar tu entrada.");

@@ -1,6 +1,6 @@
 // client/src/pages/events/details/components/OrganizerTab.tsx
 
-import { User } from "@/types/models";
+import { User } from '@/types/artist';
 
 interface OrganizerTabProps {
   organizer: User;

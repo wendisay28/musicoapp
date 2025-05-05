@@ -1,34 +1,32 @@
-// Página que lista los chats del usuario actual
+import { useParams } from "wouter";
+import ChatHeader from "./components/ChatHeader.tsx";
+import ChatMessages from "./components/ChatMessages.tsx";
+import ChatInput from "./components/ChatInput.tsx";
+import { useCurrentChat } from "./hooks/useCurrentChat.ts";
 
-import { useEffect, useState } from "react";
-import ChatPreviewItem from "./components/ChatPreviewItem";
+export default function ChatPage() {
+  const params = useParams();
+  const chatId = parseInt(params?.id || "0");
+  const { chat, loading, error, isTyping, sendMessage } = useCurrentChat(chatId);
 
-import { ChatPreview } from "./types";
-import { ScrollArea } from "@/components/ui/scroll-area";
+  if (loading) return <div className="p-4">Cargando chat...</div>;
+  if (error) return <div className="p-4 text-red-500">Error: {error.message}</div>;
+  if (!chat) return <div className="p-4">Chat no encontrado</div>;
 
-export default function ChatListPage() {
-  const [chats, setChats] = useState<ChatPreview[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Cargar los chats del usuario
-    fetch("/api/chats")
-      .then(res => res.json())
-      .then(data => setChats(data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <div className="p-4">Cargando chats...</div>;
+  const otherUser = chat.participants.find(p => p.id !== chat.currentUserId);
+  if (!otherUser) return <div className="p-4">Usuario no encontrado</div>;
 
   return (
     <div className="h-screen flex flex-col">
-      <header className="p-4 border-b text-xl font-bold">Tus chats</header>
-      <ScrollArea className="flex-1 p-2 space-y-2">
-        {chats.map(chat => (
-          <ChatPreviewItem key={chat.id} chat={chat} />
-        ))}
-      </ScrollArea>
+      <ChatHeader 
+        user={otherUser}
+        isTyping={isTyping}
+      />
+      <ChatMessages 
+        messages={chat.messages} 
+        currentUserId={chat.currentUserId} 
+      />
+      <ChatInput onSendMessage={sendMessage} />
     </div>
   );
-}
+} 

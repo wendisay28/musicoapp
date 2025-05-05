@@ -7,43 +7,31 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const headers: Record<string, string> = {
-    ...(data ? { "Content-Type": "application/json" } : {}),
-  };
+interface ApiRequestOptions {
+  method?: string;
+  url: string;
+  data?: any;
+  headers?: Record<string, string>;
+}
 
-  const auth = await import('firebase/auth');
-  const { getAuth } = auth;
-  const currentUser = getAuth().currentUser;
-
-  if (!currentUser && url.includes('/api/favorites')) {
-    throw new Error('Must be logged in to access favorites');
-  }
-
-  if (currentUser) {
-    try {
-      const token = await currentUser.getIdToken(true);
-      headers['Authorization'] = `Bearer ${token}`;
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      throw new Error('Authentication failed. Please log in again.');
-    }
-  }
-
-
-  const res = await fetch(url, {
+export async function apiRequest(options: ApiRequestOptions): Promise<Response> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const { method = 'GET', url, data, headers = {} } = options;
+  
+  const response = await fetch(`${baseUrl}${url}`, {
     method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers
+    },
+    body: data ? JSON.stringify(data) : undefined
   });
-
-  await throwIfResNotOk(res);
-  return res;
+  
+  if (!response.ok) {
+    throw new Error(`Error en la petición: ${response.statusText}`);
+  }
+  
+  return response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

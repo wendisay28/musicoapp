@@ -2,9 +2,10 @@
 // Sección que muestra las tarjetas swipeables de artistas o eventos
 
 import SwipeableCard from "@/components/swipeable-card";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 interface Props {
   items: any[];
@@ -14,7 +15,6 @@ interface Props {
   onDislike: () => void;
   onRefetch: () => void;
   activeTab: "artists" | "events";
-  setCurrentIndex: (i: number) => void;
 }
 
 export default function ExplorerCards({
@@ -39,24 +39,24 @@ export default function ExplorerCards({
         <div className="relative w-full h-full">
           {items.map((item, idx) => (
             idx >= currentIndex && (
-              <SwipeableCard
-                key={item.id}
-                id={item.id}
-                imageUrl={item.photoURL || item.image}
-                name={item.displayName || item.name}
-                role={item.role || item.category}
-                location={item.location}
-                distance={item.distance}
-                priceRange={`${new Intl.NumberFormat("es-CO", {
-                  style: "currency",
-                  currency: "COP",
-                  minimumFractionDigits: 0,
-                }).format(item.minPrice || item.price)} / ${item.priceUnit || "hora"}`}
-                onLike={onLike}
-                onDislike={onDislike}
-                isLast={idx === items.length - 1}
-                onViewProfile={() => window.location.href = `/artists/${item.id}`}
-              />
+              <Link href={`/artists/${item.id}`} key={item.id}>
+                <SwipeableCard
+                  id={item.id}
+                  imageUrl={item.photoURL || item.image}
+                  name={item.displayName || item.name}
+                  role={item.role || item.category}
+                  location={item.location}
+                  distance={item.distance}
+                  priceRange={`${new Intl.NumberFormat("es-CO", {
+                    style: "currency",
+                    currency: "COP",
+                    minimumFractionDigits: 0,
+                  }).format(item.minPrice || item.price)} / ${item.priceUnit || "hora"}`}
+                  onLike={onLike}
+                  onDislike={onDislike}
+                  isLast={idx === items.length - 1}
+                />
+              </Link>
             )
           ))}
         </div>

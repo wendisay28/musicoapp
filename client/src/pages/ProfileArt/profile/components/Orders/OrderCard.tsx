@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { OrderStatus } from '@/types/models';
+import { OrderStatus } from '@/types/artist';
 
 export interface Order {
   id: string;

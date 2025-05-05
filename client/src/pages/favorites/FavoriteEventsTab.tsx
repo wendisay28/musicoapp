@@ -1,20 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EventCard } from "@/components/event-card";
+import BaseCard from "@/components/artist-card";
 import { Calendar } from "lucide-react";
 import { Link } from "wouter";
-
-interface Event {
-  id: string;
-  name: string;
-  date: string;
-  location: string;
-  price: number;
-  image: string;
-  isFree: boolean;
-  eventType: "virtual" | "presencial";
-}
+import { Event } from "@/types/models";
 
 interface FavoriteEventsTabProps {
   events: Event[];
@@ -48,7 +38,7 @@ export default function FavoriteEventsTab({
           <p className="text-muted-foreground mb-6">
             Explora eventos y añádelos a tus favoritos para verlos aquí
           </p>
-          <Link href="/">
+          <Link href="/explore">
             <Button>Explorar eventos</Button>
           </Link>
         </CardContent>
@@ -58,29 +48,23 @@ export default function FavoriteEventsTab({
 
   return (
     <div className="space-y-4">
-      {events.map(event => (
-        <div key={event.id} className="relative group">
-          <EventCard
-            id={event.id}
-            name={event.name}
-            date={new Date(event.date)}
-            location={event.location}
-            price={event.price}
-            imageUrl={event.image}
-            isFree={event.isFree}
-            isVirtual={event.eventType === "virtual"}
-            onSave={() => onRemove(event.id)}
-            onShare={() => onShare(event.id)}
-          />
-          <Button
-            variant="destructive"
-            size="icon"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => onRemove(event.id)}
-          >
-            ✕
-          </Button>
-        </div>
+      {events.map((event) => (
+        <BaseCard
+          key={event.id}
+          id={event.id}
+          title={event.name}
+          image={event.image}
+          description={event.description}
+          location={event.location}
+          type="event"
+          onFavorite={() => onRemove(event.id)}
+          isFavorite={true}
+          additionalInfo={{
+            date: event.date,
+            capacity: event.capacity,
+            isOpen: !new Date(event.date) < new Date()
+          }}
+        />
       ))}
     </div>
   );

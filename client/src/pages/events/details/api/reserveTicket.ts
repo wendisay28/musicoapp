@@ -6,9 +6,9 @@
 
 type ReserveTicketParams = {
     eventId: string;
-  };
+};
   
-  export async function reserveTicket({ eventId }: ReserveTicketParams): Promise<void> {
+export async function reserveTicket({ eventId }: ReserveTicketParams): Promise<void> {
     try {
       const response = await fetch(`/api/events/${eventId}/reserve`, {
         method: 'POST',

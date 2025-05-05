@@ -1,73 +1,91 @@
 // Muestra filtros para buscar productos por categoría, precio u otros criterios
 
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
-interface ProductFilterProps {
-  categories: string[]; // Lista de categorías disponibles
-  onFilterChange: (filters: { category: string; minPrice: number; maxPrice: number }) => void;
+interface FilterOption {
+  value: string;
+  label: string;
 }
 
-const ProductFilter = ({ categories, onFilterChange }: ProductFilterProps) => {
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
+interface BaseFilterProps {
+  searchPlaceholder?: string;
+  categoryOptions?: FilterOption[];
+  priceRange?: { min: number; max: number };
+  onSearch?: (value: string) => void;
+  onCategoryChange?: (value: string) => void;
+  onPriceChange?: (value: number[]) => void;
+  onClear?: () => void;
+}
 
-  const handleFilter = () => {
-    onFilterChange({
-      category: selectedCategory,
-      minPrice,
-      maxPrice,
-    });
+export function BaseFilter({
+  searchPlaceholder = "Buscar...",
+  categoryOptions = [],
+  priceRange = { min: 0, max: 1000 },
+  onSearch,
+  onCategoryChange,
+  onPriceChange,
+  onClear
+}: BaseFilterProps) {
+  const [searchValue, setSearchValue] = useState("");
+  const [price, setPrice] = useState([priceRange.min, priceRange.max]);
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    onSearch?.(value);
+  };
+
+  const handlePriceChange = (value: number[]) => {
+    setPrice(value);
+    onPriceChange?.(value);
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow mb-6 space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Categoría</label>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
-        >
-          <option value="">Todas</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
-
+    <div className="space-y-4">
       <div className="flex gap-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">Precio mínimo</label>
-          <input
-            type="number"
-            value={minPrice}
-            onChange={(e) => setMinPrice(Number(e.target.value))}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
-          />
-        </div>
-
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700">Precio máximo</label>
-          <input
-            type="number"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(Number(e.target.value))}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
-          />
+        <Input
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="flex-1"
+        />
+        {categoryOptions.length > 0 && (
+          <Select onValueChange={onCategoryChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              {categoryOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Rango de Precio</label>
+        <Slider
+          value={price}
+          onValueChange={handlePriceChange}
+          min={priceRange.min}
+          max={priceRange.max}
+          step={10}
+        />
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>${price[0]}</span>
+          <span>${price[1]}</span>
         </div>
       </div>
 
-      <button
-        onClick={handleFilter}
-        className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-800"
-      >
-        Aplicar filtros
-      </button>
+      <Button variant="outline" onClick={onClear}>
+        Limpiar Filtros
+      </Button>
     </div>
   );
-};
-
-export default ProductFilter;
+}

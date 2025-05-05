@@ -3,16 +3,16 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { eventSchema, EventFormValues } from './schema.ts';
-import { createEvent } from '../api/createEvent.ts';
-import BasicInfoSection from './components/BasicInfoSection.tsx/index.ts';
-import ScheduleSection from './ScheduleSection.tsx/index.ts';
-import LocationSection from './LocationSection.tsx/index.ts';
-import ImageUploadSection from './ImageUploadSection.tsx';
+import { eventFormSchema, EventFormValues } from './schema';
+import { createEvent } from '../api/createEvent';
+import BasicInfoSection from './BasicInfoSection';
+import ScheduleSection from './ScheduleSection';
+import LocationSection from './LocationSection';
+import ImageUploadSection from './ImageUploadSection';
 
 export const EventForm = () => {
   const form = useForm<EventFormValues>({
-    resolver: zodResolver(eventSchema),
+    resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: '',
       description: '',

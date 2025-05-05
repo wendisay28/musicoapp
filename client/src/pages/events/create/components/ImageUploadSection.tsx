@@ -9,7 +9,7 @@ interface Props {
 }
 
 const ImageUploadSection: React.FC<Props> = ({ form }) => {
-  const { register, setValue, watch } = form;
+  const { setValue, watch } = form;
   const [preview, setPreview] = useState<string | null>(null);
   const imageFile = watch('image');
 

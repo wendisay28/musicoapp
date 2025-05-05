@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import ArtistCard from "@/components/artist-card";
+import { ArtistCard } from '@/components/cards/ArtistCard';
 import { calculateDistance, Coordinates } from "@/lib/location";
 import { MapPin, Star, RefreshCw } from "lucide-react";
 

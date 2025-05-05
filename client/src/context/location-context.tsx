@@ -1,85 +1,79 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Coordinates, LocationData, getCurrentLocation, reverseGeocode } from "@/lib/location";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-interface LocationContextType {
-  locationData: LocationData;
-  setLocationData: React.Dispatch<React.SetStateAction<LocationData>>;
-  getLocationPermission: () => Promise<void>;
-  setManualLocation: (address: string, coordinates?: Coordinates) => void;
-  isLoadingLocation: boolean;
+interface LocationData {
+  lat: number;
+  lng: number;
+  address: string;
 }
 
-const defaultLocationData: LocationData = {
-  coordinates: null,
-  address: "",
-};
+interface LocationContextType {
+  locationData: LocationData | null;
+  loading: boolean;
+  error: string | null;
+  updateLocation: () => Promise<void>;
+}
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locationData, setLocationData] = useState<LocationData>(defaultLocationData);
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+export function LocationProvider({ children }: { children: ReactNode }) {
+  const [locationData, setLocationData] = useState<LocationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialize from localStorage if available
-  useEffect(() => {
-    const savedLocation = localStorage.getItem("locationData");
-    if (savedLocation) {
-      setLocationData(JSON.parse(savedLocation));
-    }
-  }, []);
-
-  // Save to localStorage when location changes
-  useEffect(() => {
-    if (locationData.coordinates || locationData.address) {
-      localStorage.setItem("locationData", JSON.stringify(locationData));
-      
-      // Mark that location has been set at least once
-      localStorage.setItem("locationSet", "true");
-    }
-  }, [locationData]);
-
-  const getLocationPermission = async () => {
-    setIsLoadingLocation(true);
+  const updateLocation = async () => {
     try {
-      const coords = await getCurrentLocation();
-      const address = await reverseGeocode(coords);
-      setLocationData({
-        coordinates: coords,
-        address,
+      setLoading(true);
+      setError(null);
+
+      if (!navigator.geolocation) {
+        throw new Error("Geolocalización no soportada");
+      }
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
       });
-    } catch (error) {
-      console.error("Error getting location:", error);
+
+      const { latitude, longitude } = position.coords;
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+
+      setLocationData({
+        lat: latitude,
+        lng: longitude,
+        address: data.display_name,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al obtener la ubicación");
     } finally {
-      setIsLoadingLocation(false);
+      setLoading(false);
     }
   };
 
-  const setManualLocation = (address: string, coordinates?: Coordinates) => {
-    setLocationData({
-      coordinates: coordinates || null,
-      address,
-    });
-  };
+  useEffect(() => {
+    updateLocation();
+  }, []);
 
   return (
     <LocationContext.Provider
       value={{
         locationData,
-        setLocationData,
-        getLocationPermission,
-        setManualLocation,
-        isLoadingLocation,
+        loading,
+        error,
+        updateLocation,
       }}
     >
       {children}
     </LocationContext.Provider>
   );
-};
+}
 
-export const useLocation = (): LocationContextType => {
+export function useLocation() {
   const context = useContext(LocationContext);
   if (context === undefined) {
-    throw new Error("useLocation must be used within a LocationProvider");
+    throw new Error("useLocation debe ser usado dentro de un LocationProvider");
   }
   return context;
-};
+}

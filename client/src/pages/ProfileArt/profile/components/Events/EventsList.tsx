@@ -1,7 +1,7 @@
 import { Calendar, Plus } from 'lucide-react';
 import { Link } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EventCard } from './EventCard';
+import { EventCard } from '@/components/cards/EventCard';
 import { Button } from '@/components/ui/button';
 import { useEvents } from '../../hooks/useEvents';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';

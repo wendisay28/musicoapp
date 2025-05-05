@@ -1,11 +1,11 @@
 // client/src/pages/events/details/components/EventInfoCard.tsx
 
 import { ReactNode } from "react";
-import { Event } from "@/types/models";
+import { Event } from '@/types/artist';
 import { ReserveButton } from "./ReserveButton";
 
 interface EventInfoCardProps {
-  event: Event;
+  event: Event & { date: string | Date }; // Añadir date al tipo Event
   children?: ReactNode;
 }
 
@@ -19,7 +19,12 @@ export function EventInfoCard({ event, children }: EventInfoCardProps) {
         {new Date(event.date).toLocaleTimeString()}
       </p>
       <div className="mt-4">
-        <ReserveButton eventId={event.id} isCreator={event.isCreator} attendees={event.attendees} />
+        <ReserveButton 
+          eventId={event.id} 
+          isOrganizer={event.organizer.id === "current-user-id"}
+          alreadyReserved={false}
+          onSuccess={() => window.location.reload()}
+        />
       </div>
       {children}
     </div>

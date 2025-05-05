@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import SearchFilters from "@/components/search-filters";
-import ArtistCard from "@/components/artist-card"; // Asegúrate de que esté importado correctamente
-import EventCard from "@/components/event-card"; // Asegúrate de que esté importado correctamente
+import BaseCard from "@/components/artist-card";
 import { ArrowLeft, Search as SearchIcon, Filter } from "lucide-react";
 
 export default function SearchPage() {
@@ -129,6 +128,8 @@ export default function SearchPage() {
               </div>
             ) : artists && artists.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {artists.map((artist) => (
+                  <BaseCard
                 {artists.map((artist: any) => (
                   <ArtistCard
                     key={artist.id}

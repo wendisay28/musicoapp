@@ -1,6 +1,6 @@
 // client/src/pages/events/details/components/EventHeader.tsx
 
-import { Event } from "@/types/models";
+import { Event } from '@/types/artist';
 import { Button } from "@/components/ui/button";
 
 interface EventHeaderProps {
@@ -8,12 +8,12 @@ interface EventHeaderProps {
 }
 
 export function EventHeader({ event }: EventHeaderProps) {
-  const isOnline = event.type === "online";
+  const isOnline = event.location?.coordinates === undefined;
 
   return (
     <div className="relative w-full">
       <img
-        src={event.imageUrl}
+        src={event.imageURL || '/placeholder-event.jpg'}
         alt={event.title}
         className="w-full h-64 object-cover rounded-xl"
       />

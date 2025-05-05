@@ -1,5 +1,6 @@
 // client/src/pages/search/components/SearchInput.tsx
-import { Input, Button } from "@/components/ui"; // Asegúrate de que el alias esté bien configurado
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, Filter } from "lucide-react";
 
 interface SearchInputProps {

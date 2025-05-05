@@ -51,7 +51,7 @@ export default function NewRequestPage() {
       return;
     }
 
-    if (!user?.id) {
+    if (!user?.uid) {
       toast({
         variant: "destructive",
         title: "Inicia sesión",
@@ -61,12 +61,13 @@ export default function NewRequestPage() {
     }
 
     createRequest({
-      clientId: user.id,
+      clientId: user.uid,
       title: formData.title,
       description: formData.description,
       categoryId: formData.category,
       subcategoryId: formData.subcategory,
       price: Number(formData.price),
+      budget: Number(formData.price),
       date: formData.date.toISOString(),
       time: formData.time,
       location: formData.useCurrentLocation ? locationData?.address || '' : formData.location,

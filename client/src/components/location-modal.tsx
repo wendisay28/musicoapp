@@ -1,130 +1,107 @@
-import { useState } from "react";
+/**
+ * Componente base para mapas que permite seleccionar ubicaciones y mostrar marcadores
+ * @component
+ * @example
+ * ```tsx
+ * <BaseMap
+ *   isOpen={true}
+ *   onClose={() => {}}
+ *   markers={[
+ *     {
+ *       id: "1",
+ *       type: "place",
+ *       position: { lat: 4.6097, lng: -74.0817 },
+ *       title: "Lugar de interés"
+ *     }
+ *   ]}
+ *   onMarkerClick={(marker) => console.log(marker)}
+ *   onLocationSelect={(location) => console.log(location)}
+ * />
+ * ```
+ */
+
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useLocation } from "@/context/location-context";
-import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Navigation, Edit2 } from "lucide-react";
 
-interface LocationModalProps {
-  onComplete: () => void;
+/**
+ * Props para el componente BaseMap
+ * @interface BaseMapProps
+ * @property {boolean} isOpen - Controla si el modal está abierto
+ * @property {() => void} onClose - Callback para cerrar el modal
+ * @property {string} [title] - Título del modal
+ * @property {string} [description] - Descripción del modal
+ * @property {Marker[]} [markers] - Marcadores a mostrar en el mapa
+ * @property {(marker: Marker) => void} [onMarkerClick] - Callback para clics en marcadores
+ * @property {(location: { lat: number; lng: number; address: string }) => void} [onLocationSelect] - Callback para selección de ubicación
+ * @property {string} [searchPlaceholder] - Placeholder para el campo de búsqueda
+ */
+interface BaseMapProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  description?: string;
+  onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
+  searchPlaceholder?: string;
 }
 
-export default function LocationModal({ onComplete }: LocationModalProps) {
-  const [manualAddress, setManualAddress] = useState("");
-  const [showManualInput, setShowManualInput] = useState(false);
-  const { getLocationPermission, setManualLocation, isLoadingLocation } = useLocation();
-  const { toast } = useToast();
+export function BaseMap({
+  isOpen,
+  onClose,
+  title = "Seleccionar Ubicación",
+  description = "Busca y selecciona una ubicación en el mapa",
+  onLocationSelect,
+  searchPlaceholder = "Buscar ubicación..."
+}: BaseMapProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
-  const handleAllowLocation = async () => {
-    try {
-      await getLocationPermission();
-      toast({
-        title: "Ubicación obtenida",
-        description: "Tu ubicación ha sido detectada correctamente"
-      });
-      onComplete();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error al obtener ubicación",
-        description: "No pudimos obtener tu ubicación. Por favor intenta ingresar tu ubicación manualmente."
-      });
-      setShowManualInput(true);
-    }
-  };
-
-  const handleManualLocation = () => {
-    if (!manualAddress.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Por favor ingresa una ubicación válida"
-      });
-      return;
-    }
-
-    setManualLocation(manualAddress);
-    toast({
-      title: "Ubicación guardada",
-      description: "Tu ubicación ha sido guardada correctamente"
-    });
-    onComplete();
-  };
+  // Aquí iría la lógica del mapa (Google Maps, Mapbox, etc.)
+  // Por ahora es un placeholder
 
   return (
-    <Dialog open={true} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" aria-describedby="location-dialog-description">
-        <div className="text-center mb-6">
-          <div className="flex justify-center">
-            <MapPin className="h-12 w-12 text-primary" />
-          </div>
-          <DialogTitle className="text-2xl font-bold mt-4" id="location-dialog-title">Permitir acceso a ubicación</DialogTitle>
-          <DialogDescription id="location-dialog-description" className="text-muted-foreground mt-2">
-            Necesitamos tu ubicación para mostrarte artistas y eventos cerca de ti
-          </DialogDescription>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl">
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
         
         <div className="space-y-4">
-          {!showManualInput ? (
-            <>
-              <Button 
-                onClick={handleAllowLocation} 
-                className="w-full py-6" 
-                disabled={isLoadingLocation}
-              >
-                <Navigation className="mr-2 h-4 w-4" />
-                {isLoadingLocation ? "Obteniendo ubicación..." : "Permitir acceso a ubicación"}
-              </Button>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-background text-muted-foreground">
-                    o
-                  </span>
-                </div>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                onClick={() => setShowManualInput(true)} 
-                className="w-full py-6"
-              >
-                <Edit2 className="mr-2 h-4 w-4" />
-                Ingresar ubicación manualmente
-              </Button>
-            </>
-          ) : (
+          <Input
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          
+          <div className="h-[400px] bg-muted rounded-lg">
+            {/* Aquí iría el componente del mapa */}
+            <div className="w-full h-full flex items-center justify-center">
+              <p className="text-muted-foreground">Mapa aquí</p>
+            </div>
+          </div>
+
+          {selectedLocation && (
             <Card className="p-4">
-              <h3 className="font-medium mb-2">Ingresa tu ubicación</h3>
-              <Input
-                placeholder="Ej. Bogotá, Colombia"
-                value={manualAddress}
-                onChange={(e) => setManualAddress(e.target.value)}
-                className="mb-4"
-              />
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowManualInput(false)}
-                  className="flex-1"
-                >
-                  Volver
-                </Button>
-                <Button 
-                  onClick={handleManualLocation}
-                  className="flex-1"
-                >
-                  Guardar ubicación
-                </Button>
-              </div>
+              <h4 className="font-medium">Ubicación seleccionada:</h4>
+              <p className="text-sm text-muted-foreground">{selectedLocation.address}</p>
             </Card>
           )}
+
+          <Separator />
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={() => selectedLocation && onLocationSelect?.(selectedLocation)}
+              disabled={!selectedLocation}
+            >
+              Confirmar
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

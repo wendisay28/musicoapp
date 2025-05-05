@@ -1,139 +1,179 @@
-import { useQuery, useMutation, useQueryClient, QueryKey } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient'; // Asegúrate que esta ruta es correcta
-import { Order } from '../types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Order } from '@/types/artist';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 
-interface ApiResponse<T> {
-  data: T;
-  [key: string]: unknown;
+interface UseOrdersOptions {
+  refetchInterval?: number;
 }
 
-interface UseOrdersReturn {
+interface UseOrdersResult {
   ordersMade: Order[];
   ordersReceived: Order[];
   ordersAccepted: Order[];
   isLoading: boolean;
-  acceptOrder: (orderId: string) => void;
-  rejectOrder: (orderId: string) => void;
-  refetchOrders: () => Promise<void>;
-  isEmpty: {
-    made: boolean;
-    received: boolean;
-    accepted: boolean;
-  };
+  isUpdating: boolean;
+  error: Error | null;
+  acceptOrder: (orderId: string) => Promise<void>;
+  rejectOrder: (orderId: string) => Promise<void>;
+  refreshOrders: () => Promise<void>;
 }
 
-/**
- * Hook para manejar las órdenes del usuario
- */
-export function useOrders(userId: string): UseOrdersReturn {
-  const { toast } = useToast();
+export function useOrders(userId: string, options?: UseOrdersOptions): UseOrdersResult {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  // Definir las query keys como objetos válidos para invalidateQueries
-  const ordersMadeQueryKey: QueryKey = ['orders-made', userId];
-  const ordersReceivedQueryKey: QueryKey = ['orders-received', userId];
-  const ordersAcceptedQueryKey: QueryKey = ['orders-accepted', userId];
-
-  // Función genérica para obtener órdenes
-  const fetchOrders = useCallback(async (endpoint: string): Promise<Order[]> => {
-    try {
-      const response = await apiRequest('GET', `/api/users/${userId}/orders/${endpoint}`);
-      const jsonResponse: ApiResponse<Order[]> = await response.json();
-      return jsonResponse.data || [];
-    } catch (error) {
-      console.error(`Error fetching ${endpoint} orders:`, error);
-      toast({
-        title: 'Error',
-        description: `No se pudieron obtener las órdenes ${endpoint}`,
-        variant: 'destructive'
-      });
-      return [];
-    }
-  }, [userId, toast]);
-
-  // Obtener órdenes realizadas
-  const { data: ordersMade = [], isLoading: isLoadingMade } = useQuery<Order[]>({
-    queryKey: ordersMadeQueryKey,
-    queryFn: () => fetchOrders('made'),
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5
-  });
-
-  // Obtener órdenes recibidas
-  const { data: ordersReceived = [], isLoading: isLoadingReceived } = useQuery<Order[]>({
-    queryKey: ordersReceivedQueryKey,
-    queryFn: () => fetchOrders('received'),
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5
-  });
-
-  // Obtener órdenes aceptadas
-  const { data: ordersAccepted = [], isLoading: isLoadingAccepted } = useQuery<Order[]>({
-    queryKey: ordersAcceptedQueryKey,
-    queryFn: () => fetchOrders('accepted'),
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 5
-  });
-
-  // Función genérica para mutaciones de orden
-  const createOrderMutation = (action: 'accept' | 'reject') => {
-    return useMutation<Order, Error, string>({
-      mutationFn: async (orderId: string) => {
-        const response = await apiRequest(
-          'PATCH', 
-          `/api/orders/${orderId}/${action}`
-        );
-        const result = await response.json();
-        return result.data;
-      },
-      onSuccess: () => {
-        toast({
-          title: `Orden ${action === 'accept' ? 'aceptada' : 'rechazada'}`,
-          description: action === 'accept' 
-            ? 'Has aceptado la solicitud de servicio' 
-            : 'Has rechazado la solicitud de servicio',
-          variant: action === 'accept' ? 'default' : 'destructive'
-        });
-        queryClient.invalidateQueries({ queryKey: ordersReceivedQueryKey });
-        queryClient.invalidateQueries({ queryKey: ordersAcceptedQueryKey });
-      },
-      onError: (error) => {
-        toast({
-          title: 'Error',
-          description: `No se pudo ${action === 'accept' ? 'aceptar' : 'rechazar'} la orden`,
-          variant: 'destructive'
-        });
-        console.error(`Error ${action}ing order:`, error);
-      }
+  // Funciones de fetching
+  const fetchOrdersMade = useCallback(async (): Promise<Order[]> => {
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/made`
     });
+    return await response.json();
+  }, [userId]);
+
+  const fetchOrdersReceived = useCallback(async (): Promise<Order[]> => {
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/received`
+    });
+    return await response.json();
+  }, [userId]);
+
+  const fetchOrdersAccepted = useCallback(async (): Promise<Order[]> => {
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/accepted`
+    });
+    return await response.json();
+  }, [userId]);
+
+  // Queries para órdenes
+  const commonQueryOptions = {
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 minutos de cache
+    refetchInterval: options?.refetchInterval,
   };
 
-  const { mutate: acceptOrder } = createOrderMutation('accept');
-  const { mutate: rejectOrder } = createOrderMutation('reject');
+  const {
+    data: ordersMade = [],
+    isLoading: isLoadingMade,
+    error: errorMade
+  } = useQuery<Order[]>({
+    queryKey: ['orders', 'made', userId],
+    queryFn: fetchOrdersMade,
+    ...commonQueryOptions
+  });
 
-  // Refetch todas las órdenes
-  const refetchOrders = useCallback(async () => {
+  const {
+    data: ordersReceived = [],
+    isLoading: isLoadingReceived,
+    error: errorReceived
+  } = useQuery<Order[]>({
+    queryKey: ['orders', 'received', userId],
+    queryFn: fetchOrdersReceived,
+    ...commonQueryOptions
+  });
+
+  const {
+    data: ordersAccepted = [],
+    isLoading: isLoadingAccepted,
+    error: errorAccepted
+  } = useQuery<Order[]>({
+    queryKey: ['orders', 'accepted', userId],
+    queryFn: fetchOrdersAccepted,
+    ...commonQueryOptions
+  });
+
+  // Función para refrescar órdenes
+  const refreshOrders = useCallback(async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ordersMadeQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ordersReceivedQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ordersAcceptedQueryKey })
+      queryClient.invalidateQueries({ queryKey: ['orders', 'made', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['orders', 'received', userId] }),
+      queryClient.invalidateQueries({ queryKey: ['orders', 'accepted', userId] }),
     ]);
-  }, [queryClient, ordersMadeQueryKey, ordersReceivedQueryKey, ordersAcceptedQueryKey]);
+  }, [queryClient, userId]);
+
+  // Mutaciones para manejar órdenes
+  const handleOrderAction = useCallback(async (orderId: string, action: 'accept' | 'reject') => {
+    try {
+      await apiRequest({
+        method: 'PATCH',
+        url: `/api/orders/${orderId}/${action}`
+      });
+      return true;
+    } catch (error) {
+      console.error(`Error al ${action} la orden:`, error);
+      throw error;
+    }
+  }, []);
+
+  const {
+    mutateAsync: acceptOrderMutation,
+    isPending: isAccepting
+  } = useMutation({
+    mutationFn: (orderId: string) => handleOrderAction(orderId, 'accept'),
+    onSuccess: () => {
+      toast({
+        title: 'Orden aceptada',
+        description: 'Has aceptado la solicitud de servicio',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `No se pudo aceptar la orden: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+    onSettled: refreshOrders
+  });
+
+  const {
+    mutateAsync: rejectOrderMutation,
+    isPending: isRejecting
+  } = useMutation({
+    mutationFn: (orderId: string) => handleOrderAction(orderId, 'reject'),
+    onSuccess: () => {
+      toast({
+        title: 'Orden rechazada',
+        description: 'Has rechazado la solicitud de servicio',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `No se pudo rechazar la orden: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+    onSettled: refreshOrders
+  });
+
+  // Wrappers para las mutaciones
+  const acceptOrder = useCallback(async (orderId: string) => {
+    await acceptOrderMutation(orderId);
+  }, [acceptOrderMutation]);
+
+  const rejectOrder = useCallback(async (orderId: string) => {
+    await rejectOrderMutation(orderId);
+  }, [rejectOrderMutation]);
+
+  // Estado combinado
+  const error = errorMade || errorReceived || errorAccepted;
+  const isLoading = isLoadingMade || isLoadingReceived || isLoadingAccepted;
+  const isUpdating = isAccepting || isRejecting;
 
   return {
     ordersMade,
     ordersReceived,
     ordersAccepted,
-    isLoading: isLoadingMade || isLoadingReceived || isLoadingAccepted,
+    isLoading,
+    isUpdating,
+    error,
     acceptOrder,
     rejectOrder,
-    refetchOrders,
-    isEmpty: {
-      made: !isLoadingMade && ordersMade.length === 0,
-      received: !isLoadingReceived && ordersReceived.length === 0,
-      accepted: !isLoadingAccepted && ordersAccepted.length === 0
-    }
+    refreshOrders,
   };
 }

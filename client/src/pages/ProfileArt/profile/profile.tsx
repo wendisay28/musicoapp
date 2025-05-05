@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ProfileView } from './components/ProfileView';
-import { ProfileEditView } from './components/ProfileForm';
+import { ProfileView } from './components/ProfileView/ProfileView';
+import { ProfileForm } from './components/ProfileForm/ProfileForm';
 import { OrdersSection } from './components/Orders/OrdersSection';
 import { EventsList } from './components/Events/EventsList';
-import { AuthRequired } from '@/components/AuthRequired';
+import AuthDialog from '@/components/auth-dialog';
 import { ProfileSkeleton } from './components/ProfileView/ProfileSkeleton';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, User, ShoppingBag, Calendar, Settings } from 'lucide-react';
+import { AccountSettings } from './components/Settings/AccountSettings';
 
 /**
  * Componente principal de la página de perfil
@@ -23,7 +24,7 @@ import { Edit } from 'lucide-react';
  * - Carga de datos
  */
 export default function ProfilePage() {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -33,7 +34,7 @@ export default function ProfilePage() {
     queryKey: ['user-profile', user?.uid],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/users/${user?.uid}/profile`);
-      return response.data;
+      return response.json();
     },
     enabled: !!user?.uid
   });
@@ -43,7 +44,7 @@ export default function ProfilePage() {
     queryKey: ['artist-profile', user?.uid],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/users/${user?.uid}/artist-profile`);
-      return response.data;
+      return response.json();
     },
     enabled: !!user?.uid
   });
@@ -59,7 +60,7 @@ export default function ProfilePage() {
         <div className="text-6xl mb-4">👤</div>
         <h1 className="text-2xl font-bold mb-2">Iniciar sesión</h1>
         <p className="text-muted-foreground mb-6">Inicia sesión para ver tu perfil</p>
-        <AuthRequired />
+        <AuthDialog onClose={() => {}} />
       </div>
     );
   }
@@ -89,13 +90,13 @@ export default function ProfilePage() {
 
       {/* Contenido principal */}
       {isEditing ? (
-        <ProfileEditView
+        <ProfileForm
           initialData={{
             ...userData,
             ...artistProfile
           }}
           onCancel={() => setIsEditing(false)}
-          onSuccess={() => {
+          onSubmit={() => {
             setIsEditing(false);
             toast({
               title: 'Perfil actualizado',

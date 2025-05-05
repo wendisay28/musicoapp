@@ -7,13 +7,11 @@ import { Button } from "@/components/ui/button";
 
 interface Props {
   activeTab: "artists" | "events";
-  setActiveTab: (tab: "artists" | "events") => void;
   onApplyFilters: () => void;
 }
 
 export default function ExplorerHeader({
   activeTab,
-  setActiveTab,
   onApplyFilters,
 }: Props) {
   return (

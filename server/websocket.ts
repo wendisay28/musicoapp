@@ -1,260 +1,276 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { Server } from 'http';
-// Ensure the storage module exists or replace it with a valid implementation
-import { storage } from './storage'; // Verify './storage' exists or implement it
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import dotenv from 'dotenv';
+import logger from './logger';
+import { updateConnectionMetrics, updateMessageMetrics, updatePerformanceMetrics } from './metrics';
+import { checkRateLimit, incrementConnections, incrementMessages, decrementConnections } from './rate-limiter';
 
-interface ChatMessage {
-  type: 'chat_message';
-  payload: {
-    chatId: number;
-    senderId: number;
-    content: string;
-    timestamp: number;
-  };
+// Cargar variables de entorno
+dotenv.config();
+
+// Tipos de mensajes
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  data?: any;
 }
 
-interface UserStatusUpdate {
-  type: 'user_status';
-  payload: {
-    userId: number;
-    status: 'online' | 'offline';
-  };
-}
+// Configuración de seguridad
+const SECURITY_CONFIG = {
+  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+  maxConnections: parseInt(process.env.MAX_CONNECTIONS || '1000', 10),
+  messageSizeLimit: parseInt(process.env.MESSAGE_SIZE_LIMIT || '1048576', 10), // 1MB
+  pingTimeout: parseInt(process.env.PING_TIMEOUT || '60000', 10),
+  pingInterval: parseInt(process.env.PING_INTERVAL || '25000', 10)
+};
 
-interface ErrorMessage {
-  type: 'error';
-  payload: {
-    message: string;
-  };
-}
+// Crear servidor HTTP
+const httpServer = createServer();
 
-type WebSocketMessage = ChatMessage | UserStatusUpdate | ErrorMessage;
+// Crear servidor WebSocket con configuración de seguridad
+const wss = new WebSocketServer({ 
+  server: httpServer,
+  maxPayload: SECURITY_CONFIG.messageSizeLimit,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024
+    },
+    clientNoContextTakeover: true,
+    serverNoContextTakeover: true,
+    serverMaxWindowBits: 10,
+    concurrencyLimit: 10,
+    threshold: 1024
+  }
+});
 
-const clients = new Map<string, WebSocket>();
-const userSockets = new Map<number, string[]>();
+// Crear servidor Socket.IO con configuración de seguridad
+const io = new Server(httpServer, {
+  cors: {
+    origin: SECURITY_CONFIG.allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Authorization", "Content-Type"]
+  },
+  maxHttpBufferSize: SECURITY_CONFIG.messageSizeLimit,
+  pingTimeout: SECURITY_CONFIG.pingTimeout,
+  pingInterval: SECURITY_CONFIG.pingInterval,
+  connectTimeout: 45000,
+  transports: ['websocket', 'polling']
+});
 
-export function setupWebSocketServer(httpServer: Server) {
-  // Configuración con manejo de errores mejorado
-  const wss = new WebSocketServer({ 
-    server: httpServer, 
-    path: '/ws',
-    // Aumentar el tiempo de ping-pong para mantener vivas las conexiones
-    clientTracking: true,
-    perMessageDeflate: {
-      zlibDeflateOptions: {
-        chunkSize: 1024,
-        memLevel: 7,
-        level: 3
-      },
-      zlibInflateOptions: {
-        chunkSize: 10 * 1024
-      },
-      // Otros parámetros de compresión predeterminados
-      concurrencyLimit: 10, 
-      threshold: 1024 // Solo comprimir mensajes mayores a 1KB
-    }
-  });
+// Almacenar conexiones activas con límite
+const clients = new Set<WebSocket>();
+
+// Middleware de autenticación
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    logger.warn('Intento de conexión sin token', { ip: socket.handshake.address });
+    return next(new Error('No autorizado'));
+  }
+  // Aquí iría la lógica de verificación del token
+  // Por ahora solo simulamos la verificación
+  if (token === 'valid-token') {
+    return next();
+  }
+  logger.warn('Token inválido', { ip: socket.handshake.address });
+  return next(new Error('Token inválido'));
+});
+
+// Middleware de rate limiting
+io.use((socket, next) => {
+  const ip = socket.handshake.address;
+  const rateLimitCheck = checkRateLimit(ip);
   
-  console.log('WebSocket server initialized on path: /ws');
-  
-  // Manejar errores a nivel del servidor WebSocket
-  wss.on('error', (error) => {
-    console.error('WebSocket server error:', error);
-  });
-  
-  // Manejar el evento de "headers" para configurar CORS si es necesario
-  wss.on('headers', (headers, req) => {
-    // Agregar encabezados CORS si es necesario
-    const origin = req.headers.origin;
-    if (origin) {
-      headers.push('Access-Control-Allow-Origin: *');
-      headers.push('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
-    }
-  });
-  
-  // Manejar nuevas conexiones
-  wss.on('connection', (ws: WebSocket, req) => {
-    // Generar un ID único para este cliente
-    const clientId = Math.random().toString(36).substring(2, 15);
-    clients.set(clientId, ws);
-    
-    const ip = req.socket.remoteAddress || 'unknown';
-    console.log(`WebSocket client connected: ${clientId} from ${ip}`);
-    
-    // Configurar un ping para mantener la conexión activa
-    const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.ping();
-      } else {
-        clearInterval(pingInterval);
-      }
-    }, 30000); // Ping cada 30 segundos
-    
-    // Manejar mensajes entrantes
-    ws.on('message', async (message: string) => {
-      try {
-        console.log(`Received message from client ${clientId}: ${message.toString().substring(0, 100)}...`);
-        
-        // Intentar parsear el mensaje como JSON
-        const data = JSON.parse(message.toString()) as WebSocketMessage;
-        
-        // Procesar según el tipo de mensaje
-        switch (data.type) {
-          case 'chat_message':
-            await handleChatMessage(data, clientId);
-            break;
-          case 'user_status':
-            handleUserStatus(data, clientId);
-            break;
-          default:
-            console.warn(`Unknown message type: ${data.type}`);
-            ws.send(JSON.stringify({
-              type: 'error',
-              payload: { message: 'Unknown message type' }
-            }));
-        }
-      } catch (error) {
-        console.error('Error processing message:', error);
-        
-        // Solo enviar respuesta de error si la conexión sigue abierta
-        if (ws.readyState === WebSocket.OPEN) {
-          try {
-            ws.send(JSON.stringify({
-              type: 'error',
-              payload: { message: 'Failed to process message' }
-            }));
-          } catch (sendError) {
-            console.error('Error sending error message:', sendError);
-          }
-        }
-      }
-    });
-    
-    // Manejar cierre de conexión
-    ws.on('close', (code, reason) => {
-      // Limpiar recursos asociados a esta conexión
-      clearInterval(pingInterval);
-      clients.delete(clientId);
-      
-      // Encontrar y eliminar el cliente de userSockets
-      for (const [userId, socketIds] of userSockets.entries()) {
-        const index = socketIds.indexOf(clientId);
-        if (index !== -1) {
-          socketIds.splice(index, 1);
-          if (socketIds.length === 0) {
-            userSockets.delete(userId);
-            broadcastUserStatus(userId, 'offline');
-          }
-        }
-      }
-      
-      console.log(`WebSocket client disconnected: ${clientId}. Code: ${code}, Reason: ${reason || 'No reason provided'}`);
-    });
-    
-    // Manejar errores específicos de esta conexión
-    ws.on('error', (error) => {
-      console.error(`WebSocket error for client ${clientId}:`, error);
-    });
-    
-    // Confirmar conexión establecida
-    try {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({
-          type: 'connection_established',
-          payload: { clientId }
-        }));
-      }
-    } catch (error) {
-      console.error('Error sending connection confirmation:', error);
-    }
-  });
-  
-  async function handleChatMessage(data: ChatMessage, clientId: string) {
-    try {
-      // Save message to database
-      const newMessage = await storage.createMessage({
-        chatId: data.payload.chatId,
-        senderId: data.payload.senderId,
-        content: data.payload.content,
-        read: false
-      });
-      
-      // Get the chat to find the other user
-      const chat = await storage.getChat(data.payload.chatId);
-      if (!chat) return;
-      
-      const otherUserId = chat.user1Id === data.payload.senderId ? chat.user2Id : chat.user1Id;
-      
-      // Send to all connected clients of the other user
-      const otherUserSockets = userSockets.get(otherUserId) || [];
-      
-      otherUserSockets.forEach(socketId => {
-        const client = clients.get(socketId);
-        if (client && client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'new_message',
-            payload: {
-              message: newMessage,
-              chatId: data.payload.chatId
-            }
-          }));
-        }
-      });
-    } catch (error) {
-      console.error('Error handling chat message:', error);
-    }
+  if (!rateLimitCheck.allowed) {
+    logger.warn('Rate limit excedido', { ip, message: rateLimitCheck.message });
+    return next(new Error(rateLimitCheck.message));
   }
   
-  function handleUserStatus(data: UserStatusUpdate, clientId: string) {
-    const { userId, status } = data.payload;
-    
-    if (status === 'online') {
-      // Add this socket to the user's list
-      const userSocketList = userSockets.get(userId) || [];
-      if (!userSocketList.includes(clientId)) {
-        userSocketList.push(clientId);
-        userSockets.set(userId, userSocketList);
-      }
-      
-      // Broadcast user status if this is the first socket
-      if (userSocketList.length === 1) {
-        broadcastUserStatus(userId, 'online');
-      }
+  incrementConnections(ip);
+  next();
+});
+
+// Manejar conexiones WebSocket
+wss.on('connection', (ws, req) => {
+  const startTime = Date.now();
+  const ip = req.socket.remoteAddress || 'unknown';
+  
+  // Verificar rate limit
+  const rateLimitCheck = checkRateLimit(ip);
+  if (!rateLimitCheck.allowed) {
+    logger.warn('Rate limit excedido en WebSocket', { ip, message: rateLimitCheck.message });
+    ws.close(1008, rateLimitCheck.message);
+    return;
+  }
+
+  // Verificar origen
+  const origin = req.headers.origin;
+  if (origin && !SECURITY_CONFIG.allowedOrigins.includes(origin)) {
+    logger.warn('Origen no permitido', { ip, origin });
+    ws.close(1008, 'Origen no permitido');
+    return;
+  }
+
+  // Verificar límite de conexiones
+  if (clients.size >= SECURITY_CONFIG.maxConnections) {
+    logger.warn('Límite de conexiones alcanzado', { ip });
+    ws.close(1008, 'Límite de conexiones alcanzado');
+    return;
+  }
+
+  logger.info('Nueva conexión WebSocket', { ip });
+  clients.add(ws);
+  incrementConnections(ip);
+  updateConnectionMetrics('connect');
+
+  // Configurar ping-pong
+  const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
     } else {
-      // Remove this socket from the user's list
-      const userSocketList = userSockets.get(userId) || [];
-      const index = userSocketList.indexOf(clientId);
-      
-      if (index !== -1) {
-        userSocketList.splice(index, 1);
-        
-        if (userSocketList.length === 0) {
-          userSockets.delete(userId);
-          broadcastUserStatus(userId, 'offline');
-        } else {
-          userSockets.set(userId, userSocketList);
+      clearInterval(pingInterval);
+    }
+  }, SECURITY_CONFIG.pingInterval);
+
+  // Manejar mensajes
+  ws.on('message', (message) => {
+    const messageStartTime = Date.now();
+    try {
+      // Verificar tamaño del mensaje
+      const messageStr = message.toString();
+      if (messageStr.length > SECURITY_CONFIG.messageSizeLimit) {
+        logger.warn('Mensaje demasiado grande', { ip, size: messageStr.length });
+        ws.send(JSON.stringify({ error: 'Mensaje demasiado grande' }));
+        return;
+      }
+
+      // Verificar rate limit de mensajes
+      incrementMessages(ip);
+      const data = JSON.parse(messageStr);
+      logger.info('Mensaje recibido', { ip, type: data.type });
+      updateMessageMetrics('received');
+
+      // Broadcast a todos los clientes
+      clients.forEach(client => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(data));
+          updateMessageMetrics('sent');
         }
-      }
+      });
+
+      // Actualizar métricas de rendimiento
+      const responseTime = Date.now() - messageStartTime;
+      updatePerformanceMetrics(responseTime);
+    } catch (error) {
+      logger.error('Error al procesar mensaje', { ip, error });
+      updateMessageMetrics('error');
+      ws.send(JSON.stringify({ error: 'Error al procesar mensaje' }));
     }
+  });
+
+  // Manejar cierre de conexión
+  ws.on('close', () => {
+    logger.info('Conexión WebSocket cerrada', { ip });
+    clearInterval(pingInterval);
+    clients.delete(ws);
+    decrementConnections(ip);
+    updateConnectionMetrics('disconnect');
+  });
+
+  // Manejar errores
+  ws.on('error', (error) => {
+    logger.error('Error en WebSocket', { ip, error });
+    clearInterval(pingInterval);
+    clients.delete(ws);
+    decrementConnections(ip);
+    updateConnectionMetrics('disconnect');
+  });
+});
+
+// Manejar conexiones Socket.IO
+io.on('connection', (socket) => {
+  const ip = socket.handshake.address;
+  logger.info('Nueva conexión Socket.IO', { ip });
+
+  // Manejar mensajes
+  socket.on('notification', (data) => {
+    const startTime = Date.now();
+    try {
+      // Verificar tamaño del mensaje
+      if (JSON.stringify(data).length > SECURITY_CONFIG.messageSizeLimit) {
+        logger.warn('Notificación demasiado grande', { ip, size: JSON.stringify(data).length });
+        socket.emit('error', 'Mensaje demasiado grande');
+        return;
+      }
+
+      // Verificar rate limit de mensajes
+      incrementMessages(ip);
+      logger.info('Notificación recibida', { ip, type: data.type });
+      updateMessageMetrics('received');
+
+      // Broadcast a todos los clientes
+      io.emit('notification', data);
+      updateMessageMetrics('sent');
+
+      // Actualizar métricas de rendimiento
+      const responseTime = Date.now() - startTime;
+      updatePerformanceMetrics(responseTime);
+    } catch (error) {
+      logger.error('Error al procesar notificación', { ip, error });
+      updateMessageMetrics('error');
+      socket.emit('error', 'Error al procesar notificación');
+    }
+  });
+
+  // Manejar desconexión
+  socket.on('disconnect', () => {
+    logger.info('Conexión Socket.IO cerrada', { ip });
+    decrementConnections(ip);
+    updateConnectionMetrics('disconnect');
+  });
+});
+
+// Iniciar servidor
+const PORT = process.env.WS_PORT || 3001;
+httpServer.listen(PORT, () => {
+  logger.info(`Servidor WebSocket escuchando en puerto ${PORT}`);
+});
+
+// Función para enviar notificaciones
+export function sendNotification(notification: Notification) {
+  const startTime = Date.now();
+  const message = JSON.stringify(notification);
+  
+  // Verificar tamaño del mensaje
+  if (message.length > SECURITY_CONFIG.messageSizeLimit) {
+    logger.error('Error al enviar notificación: mensaje demasiado grande');
+    throw new Error('Mensaje demasiado grande');
   }
   
-  function broadcastUserStatus(userId: number, status: 'online' | 'offline') {
-    // Get all users who might be interested in this status update
-    // For simplicity, we'll broadcast to all connected clients
-    // In a real app, you'd only send to users who have chats with this user
-    
-    for (const client of clients.values()) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          type: 'user_status_update',
-          payload: {
-            userId,
-            status
-          }
-        }));
-      }
+  // Enviar a clientes WebSocket
+  clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+      updateMessageMetrics('sent');
     }
-  }
-  
-  return wss;
+  });
+
+  // Enviar a clientes Socket.IO
+  io.emit('notification', notification);
+  updateMessageMetrics('sent');
+
+  // Actualizar métricas de rendimiento
+  const responseTime = Date.now() - startTime;
+  updatePerformanceMetrics(responseTime);
 }
+
+export { httpServer, wss, io };

@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { RequestCard } from "@/components/real-time-offers/RequestCard";
+import { RequestCard } from "./components/RequestCard";
 import { useServiceRequests } from "@/hooks/useRealTimeOffers";
 import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 
 export default function RealTimeOffersPage() {
   const { user } = useAuth();
-  const { data: requests = [], isLoading } = useServiceRequests(user?.id);
+  const { data: requests = [], isLoading } = useServiceRequests(user?.uid);
 
   return (
     <div className="container mx-auto px-4 py-8">

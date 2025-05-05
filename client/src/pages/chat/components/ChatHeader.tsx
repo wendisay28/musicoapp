@@ -1,19 +1,21 @@
 // Encabezado del chat que muestra información del otro usuario
 
 import { ArrowLeft, Info, Phone, VideoIcon, MoreVertical } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "../../../components/ui/avatar.tsx";
+import { Button } from "../../../components/ui/button.tsx";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/dropdown-menu.tsx";
 import { Link } from "wouter";
 
 interface Props {
-  otherUser: {
+  user: {
+    id: number;
     displayName: string;
     photoURL?: string;
   };
+  isTyping: boolean;
 }
 
-export default function ChatHeader({ otherUser }: Props) {
+export default function ChatHeader({ user, isTyping }: Props) {
   return (
     <header className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center gap-3">
@@ -23,12 +25,12 @@ export default function ChatHeader({ otherUser }: Props) {
           </Button>
         </Link>
         <Avatar>
-          <AvatarImage src={otherUser.photoURL} />
-          <AvatarFallback>{otherUser.displayName[0]}</AvatarFallback>
+          <AvatarImage src={user.photoURL} />
+          <AvatarFallback>{user.displayName[0]}</AvatarFallback>
         </Avatar>
         <div>
-          <h2 className="font-semibold">{otherUser.displayName}</h2>
-          <p className="text-sm text-muted-foreground">En línea</p>
+          <h2 className="font-semibold">{user.displayName}</h2>
+          {isTyping && <p className="text-sm text-muted-foreground">Escribiendo...</p>}
         </div>
       </div>
       <div className="flex items-center gap-2">

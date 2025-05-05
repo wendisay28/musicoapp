@@ -8,13 +8,28 @@ import ExplorerHeader from "./components/ExplorerHeader";
 import ExplorerCards from "./components/ExplorerCards";
 import { useExplorerItems } from "./hooks/useExplorerItems";
 
+interface ExplorerItem {
+  id: string | number;
+  photoURL?: string;
+  image?: string;
+  displayName?: string;
+  name?: string;
+  role?: string;
+  category?: string;
+  location: string;
+  distance?: number;
+  minPrice?: number;
+  price?: number;
+  priceUnit?: string;
+}
+
 export default function ExplorerPage() {
-  const [activeTab, setActiveTab] = useState<"artists" | "events">("artists");
+  const [activeTab] = useState<"artists" | "events">("artists");
   const [currentIndex, setCurrentIndex] = useState(0);
   const { locationData } = useLocation();
   const { toast } = useToast();
 
-  const { items, isLoading, refetch } = useExplorerItems(activeTab, locationData);
+  const { items = [], isLoading, refetch } = useExplorerItems(activeTab, locationData);
 
   const handleLike = async (id: string | number) => {
     try {
@@ -47,7 +62,7 @@ export default function ExplorerPage() {
   };
 
   const goToNextItem = () => {
-    if (items && currentIndex < items.length - 1) {
+    if (items.length > 0 && currentIndex < items.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
@@ -64,18 +79,16 @@ export default function ExplorerPage() {
     <div className="container mx-auto px-4 py-6">
       <ExplorerHeader
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
         onApplyFilters={handleApplyFilters}
       />
       <ExplorerCards
-        items={items}
+        items={items as ExplorerItem[]}
         currentIndex={currentIndex}
         isLoading={isLoading}
         onLike={handleLike}
         onDislike={handleDislike}
         onRefetch={refetch}
         activeTab={activeTab}
-        setCurrentIndex={setCurrentIndex}
       />
     </div>
   );

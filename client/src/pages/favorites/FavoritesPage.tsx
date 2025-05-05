@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
@@ -8,23 +7,46 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { UserCheck, Calendar } from "lucide-react";
+import { Event } from '@/types/artist';
 
-import FavoriteArtistsTab from "@/components/favorites/FavoriteArtistsTab";
-import FavoriteEventsTab from "@/components/favorites/FavoriteEventsTab";
+import FavoriteArtistsTab from "./FavoriteArtistsTab";
+import FavoriteEventsTab from "./FavoriteEventsTab";
+
+interface Artist {
+  id: string;
+  displayName: string;
+  role: string;
+  minPrice: number;
+  priceUnit?: string;
+  photoURL: string;
+}
 
 export default function FavoritesPage() {
-  const [activeTab, setActiveTab] = useState("artists");
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const { data: favoriteArtists, isLoading: isLoadingArtists } = useQuery({
+  const { data: favoriteArtists, isLoading: isLoadingArtists } = useQuery<Artist[]>({
     queryKey: ['/api/favorites/artists'],
+    queryFn: async () => {
+      const response = await apiRequest({
+        method: 'GET',
+        url: '/api/favorites/artists'
+      });
+      return response.json();
+    },
     enabled: !!user,
     throwOnError: false,
   });
 
-  const { data: favoriteEvents, isLoading: isLoadingEvents } = useQuery({
+  const { data: favoriteEvents, isLoading: isLoadingEvents } = useQuery<Event[]>({
     queryKey: ['/api/favorites/events'],
+    queryFn: async () => {
+      const response = await apiRequest({
+        method: 'GET',
+        url: '/api/favorites/events'
+      });
+      return response.json();
+    },
     enabled: !!user,
     throwOnError: false,
   });
@@ -40,8 +62,12 @@ export default function FavoritesPage() {
     }
 
     try {
-      await apiRequest("DELETE", `/api/favorites/${type}/${id}`, {
-        userId: user.uid,
+      await apiRequest({
+        method: "DELETE",
+        url: `/api/favorites/${type}/${id}`,
+        data: {
+          userId: user.uid,
+        }
       });
 
       queryClient.invalidateQueries({ queryKey: [`/api/favorites/${type}s`] });
@@ -61,10 +87,23 @@ export default function FavoritesPage() {
   };
 
   const handleShareEvent = (id: string) => {
-    toast({
-      title: "Compartir evento",
-      description: "La funcionalidad de compartir está en desarrollo"
-    });
+    const event = favoriteEvents?.find(e => e.id === id);
+    if (event) {
+      const shareData = {
+        title: event.title,
+        text: `¡Mira este evento! ${event.title} - ${new Date(event.startDate).toLocaleDateString()}`,
+        url: `${window.location.origin}/events/${id}`,
+      };
+      
+      if (navigator.share) {
+        navigator.share(shareData).catch(console.error);
+      } else {
+        toast({
+          title: "Compartir evento",
+          description: "Copia el enlace para compartir",
+        });
+      }
+    }
   };
 
   if (!user) {
@@ -87,7 +126,7 @@ export default function FavoritesPage() {
         <p className="text-muted-foreground">Guarda artistas y eventos para acceder rápidamente</p>
       </header>
 
-      <Tabs defaultValue="artists" onValueChange={setActiveTab}>
+      <Tabs defaultValue="artists">
         <TabsList className="w-full mb-6">
           <TabsTrigger value="artists" className="flex-1">
             <UserCheck className="h-4 w-4 mr-2" />

@@ -1,27 +1,40 @@
 // Simula una petición para obtener artículos del blog
 
-import { Blog } from "../types/blog"
+import { BlogPost } from "../types";
 
-export const fetchBlogs = async (): Promise<Blog[]> => {
-  // Este arreglo simula datos desde un backend
+export const fetchBlogs = async (): Promise<BlogPost[]> => {
   return [
     {
       id: "1",
       title: "Cómo destacar como artista en plataformas digitales",
-      excerpt: "Consejos prácticos para crecer tu presencia en línea...",
+      slug: "destacar-como-artista-digital",
+      summary: "Consejos prácticos para crecer tu presencia en línea...",
       content: "Contenido completo del artículo...",
-      image: "/images/blog1.jpg",
-      date: "2025-04-20",
-      category: "Consejos"
+      coverImage: "/images/blog1.jpg",
+      author: {
+        name: "Ana Martínez",
+        avatarUrl: "/images/authors/ana.jpg"
+      },
+      tags: ["arte", "digital", "marketing"],
+      createdAt: "2025-04-20T10:00:00Z",
+      updatedAt: "2025-04-20T10:00:00Z",
+      status: "published"
     },
     {
       id: "2",
       title: "Tendencias de arte digital en 2025",
-      excerpt: "Explora los estilos, técnicas y herramientas más populares...",
+      slug: "tendencias-arte-digital-2025",
+      summary: "Explora los estilos, técnicas y herramientas más populares...",
       content: "Contenido completo del artículo...",
-      image: "/images/blog2.jpg",
-      date: "2025-04-18",
-      category: "Tendencias"
+      coverImage: "/images/blog2.jpg",
+      author: {
+        name: "Carlos Rojas",
+        avatarUrl: "/images/authors/carlos.jpg"
+      },
+      tags: ["tendencias", "arte", "digital"],
+      createdAt: "2025-04-18T15:00:00Z",
+      updatedAt: "2025-04-18T15:00:00Z",
+      status: "published"
     }
     // Puedes agregar más objetos para pruebas
   ]

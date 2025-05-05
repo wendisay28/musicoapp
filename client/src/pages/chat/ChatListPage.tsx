@@ -1,37 +1,15 @@
 // Página que muestra una lista de chats disponibles con vista previa
 
-import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "wouter";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../components/ui/button.tsx";
 import { MessageSquare } from "lucide-react";
-
-interface ChatPreview {
-  id: number;
-  otherUser: {
-    id: number;
-    displayName: string;
-    photoURL?: string;
-  };
-  lastMessage: {
-    content: string;
-    timestamp: string;
-    senderId: number;
-    read: boolean;
-  } | null;
-}
+import ChatListItem from "./components/ChatListItem.tsx";
+import { useChats } from "./hooks/useChats.ts";
 
 export default function ChatListPage() {
-  const [chats, setChats] = useState<ChatPreview[]>([]);
+  const { chats, loading, error } = useChats();
 
-  useEffect(() => {
-    // Obtener lista de chats desde el backend
-    fetch("/api/chats")
-      .then(res => res.json())
-      .then(setChats)
-      .catch(console.error);
-  }, []);
+  if (loading) return <div className="p-4">Cargando chats...</div>;
+  if (error) return <div className="p-4 text-red-500">Error: {error.message}</div>;
 
   return (
     <div className="h-screen p-4 bg-background">
@@ -43,24 +21,7 @@ export default function ChatListPage() {
 
       <div className="space-y-4">
         {chats.map((chat) => (
-          <Link href={`/chats/${chat.id}`} key={chat.id}>
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted cursor-pointer transition">
-              <Avatar>
-                <AvatarImage src={chat.otherUser.photoURL} />
-                <AvatarFallback>{chat.otherUser.displayName[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="font-medium">{chat.otherUser.displayName}</h2>
-                <p className="text-sm text-muted-foreground truncate">
-                  {chat.lastMessage?.content || "Sin mensajes aún"}
-                </p>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {chat.lastMessage?.timestamp &&
-                  format(new Date(chat.lastMessage.timestamp), "HH:mm")}
-              </div>
-            </div>
-          </Link>
+          <ChatListItem key={chat.id} chat={chat} />
         ))}
       </div>
 

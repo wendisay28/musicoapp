@@ -1,22 +1,46 @@
 // Vista previa del blog, muestra artículos recientes con imagen y botón de ver más
 
 import { FC } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button.tsx";
+import { BlogPost } from "../../blog/types.ts";
+import BlogCard from "../../blog/components/BlogCard.tsx";
 
 // Artículos de blog de ejemplo
-const blogPosts = [
+const blogPosts: BlogPost[] = [
   {
-    id: 1,
+    id: "1",
     title: "El renacimiento del arte digital",
-    image: "/images/blog1.jpg",
+    slug: "renacimiento-arte-digital",
+    content: "",
     summary: "Una mirada profunda al crecimiento del arte digital y su impacto en la cultura.",
+    coverImage: "/images/blog1.jpg",
+    author: {
+      name: "Artista Digital",
+      avatarUrl: "/images/avatar1.jpg"
+    },
+    tags: ["Arte Digital", "Cultura"],
+    createdAt: "2024-04-01",
+    updatedAt: "2024-04-01",
+    status: "published",
+    featured: true
   },
   {
-    id: 2,
+    id: "2",
     title: "Consejos para artistas emergentes",
-    image: "/images/blog2.jpg",
+    slug: "consejos-artistas-emergentes",
+    content: "",
     summary: "Estrategias y herramientas para artistas que inician su camino profesional.",
-  },
+    coverImage: "/images/blog2.jpg",
+    author: {
+      name: "Experto en Arte",
+      avatarUrl: "/images/avatar2.jpg"
+    },
+    tags: ["Consejos", "Desarrollo Profesional"],
+    createdAt: "2024-04-02",
+    updatedAt: "2024-04-02",
+    status: "published",
+    featured: true
+  }
 ];
 
 const BlogPreview: FC = () => {
@@ -31,22 +55,7 @@ const BlogPreview: FC = () => {
 
       <div className="grid gap-4 md:grid-cols-2">
         {blogPosts.map((post) => (
-          <div key={post.id} className="rounded-xl overflow-hidden shadow-md bg-white flex flex-col sm:flex-row">
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full sm:w-48 h-40 object-cover"
-            />
-            <div className="p-4 flex flex-col justify-between">
-              <div>
-                <h3 className="font-semibold">{post.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{post.summary}</p>
-              </div>
-              <Button variant="link" className="mt-2 p-0 text-primary" size="sm">
-                Leer más
-              </Button>
-            </div>
-          </div>
+          <BlogCard key={post.id} post={post} />
         ))}
       </div>
     </section>

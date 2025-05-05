@@ -5,20 +5,38 @@ export interface ChatPreview {
     otherUser: {
       id: number;
       displayName: string;
-      photoURL: string | null;
+      photoURL?: string;
     };
     lastMessage: {
       content: string;
       timestamp: string;
+      senderId: number;
+      read: boolean;
     } | null;
-    unread: boolean;
+    unreadCount: number;
   }
  // Tipo para un mensaje individual
 export interface ChatMessage {
     id: number;
-    senderId: number;
-    senderName: string;
     content: string;
-    timestamp: string; // o Date si ya viene como objeto
-    status?: "sent" | "delivered" | "read";
-  } 
+    timestamp: string;
+    senderId: number;
+    read: boolean;
+    attachments?: {
+      type: "image" | "file";
+      url: string;
+      name?: string;
+    }[];
+  }
+
+export interface Chat {
+  id: number;
+  currentUserId: number;
+  participants: {
+    id: number;
+    displayName: string;
+    photoURL?: string;
+  }[];
+  messages: ChatMessage[];
+  isTyping?: boolean;
+} 

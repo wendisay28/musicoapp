@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Event } from "@/types/models";
+import { Event } from '@/types/artist';
 
 export const useEventDetails = (eventId: string) => {
   return useQuery<Event>({

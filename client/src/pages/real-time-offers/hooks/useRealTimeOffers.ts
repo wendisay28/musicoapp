@@ -7,7 +7,7 @@ export const useServiceRequests = (userId?: string) => {
     queryKey: ['service-requests', userId],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/service-requests');
-      return response.data || [];
+      return (await response.json()) || [];
     },
     enabled: !!userId,
   });
@@ -17,7 +17,7 @@ export const useCreateRequest = () => {
   return useMutation({
     mutationFn: async (data: Omit<RequestOffer, 'id' | 'createdAt' | 'responses'>) => {
       const response = await apiRequest('POST', '/api/service-requests', data);
-      return response.data;
+      return response.json();
     }
   });
 };
@@ -38,7 +38,7 @@ export const useRespondToRequest = () => {
         `/api/service-requests/${requestId}/responses/${responseId}`, 
         { status }
       );
-      return response.data;
+      return response.json();
     }
   });
 };

@@ -1,7 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArtistCard } from "@/components/artist-card";
+import { ArtistCard } from '@/components/cards/ArtistCard';
+
 import { UserX } from "lucide-react";
 import { Link } from "wouter";
 

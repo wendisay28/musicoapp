@@ -1,31 +1,27 @@
 // Input para escribir un mensaje y botón para enviarlo
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "../../../components/ui/input.tsx";
+import { Button } from "../../../components/ui/button.tsx";
 import { Send } from "lucide-react";
 
 interface Props {
-  onSend: (msg: string) => void;
+  onSendMessage: (content: string) => Promise<void>;
 }
 
-export default function ChatInput({ onSend }: Props) {
+export default function ChatInput({ onSendMessage }: Props) {
   const [message, setMessage] = useState("");
 
-  const handleSend = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!message.trim()) return;
-    onSend(message);
+    
+    await onSendMessage(message);
     setMessage("");
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSend();
-      }}
-      className="p-4 border-t flex items-center gap-2"
-    >
+    <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t">
       <Input
         value={message}
         onChange={(e) => setMessage(e.target.value)}
@@ -33,7 +29,7 @@ export default function ChatInput({ onSend }: Props) {
         className="flex-1"
       />
       <Button type="submit" size="icon">
-        <Send className="h-5 w-5" />
+        <Send className="w-4 h-4" />
       </Button>
     </form>
   );

@@ -1,7 +1,7 @@
 // Archivo: src/pages/blog/dummyPosts.ts
 // Datos simulados de artículos del blog, usados como placeholder antes de conectar con el backend
 
-import { BlogPost } from "./types";
+import { BlogPost } from "../types";
 
 export const dummyPosts: BlogPost[] = [
   {
@@ -16,10 +16,21 @@ export const dummyPosts: BlogPost[] = [
     coverImage: "/images/blog/artista-digital.jpg",
     author: {
       name: "Laura Méndez",
-      avatarUrl: "/images/authors/laura.jpg"
+      avatarUrl: "/images/authors/laura.jpg",
+      bio: "Artista digital y educadora con más de 10 años de experiencia",
+      social: {
+        twitter: "@lauramendez",
+        instagram: "@lauramendez.art",
+        website: "https://lauramendez.art"
+      }
     },
     createdAt: "2024-11-10T10:00:00Z",
-    tags: ["arte", "digital", "carrera"]
+    updatedAt: "2024-11-10T10:00:00Z",
+    tags: ["arte", "digital", "carrera"],
+    readingTime: 8,
+    status: "published",
+    featured: true,
+    relatedPosts: ["2", "3"]
   },
   {
     id: "2",
@@ -33,9 +44,19 @@ export const dummyPosts: BlogPost[] = [
     coverImage: "/images/blog/tendencias-2025.jpg",
     author: {
       name: "Carlos Rojas",
-      avatarUrl: "/images/authors/carlos.jpg"
+      avatarUrl: "/images/authors/carlos.jpg",
+      bio: "Crítico de arte y curador independiente",
+      social: {
+        twitter: "@carlosrojasart",
+        instagram: "@carlosrojas.art"
+      }
     },
     createdAt: "2025-02-02T15:00:00Z",
-    tags: ["tendencias", "arte", "inspiración"]
+    updatedAt: "2025-02-02T15:00:00Z",
+    tags: ["tendencias", "arte", "inspiración"],
+    readingTime: 10,
+    status: "published",
+    featured: true,
+    relatedPosts: ["1", "3"]
   }
 ];

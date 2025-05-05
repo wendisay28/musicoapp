@@ -7,6 +7,7 @@ import { SkillsSection } from '../components/ProfileForm/SkillsSection';
 import { ArtistInfoSection } from '../components/ProfileForm/ArtistInfoSection';
 import { profileFormSchema } from '../components/ProfileForm/schemas/profileFormSchema';
 import { ProfileFormValues } from '../components/ProfileForm/schemas/profileFormSchema';
+import { useToast } from '@/hooks/use-toast';
 
 
 const defaultValues: ProfileFormValues = {
@@ -23,6 +24,7 @@ const defaultValues: ProfileFormValues = {
 };
 
 export default function ProfileEditView() {
+  const { toast } = useToast();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -32,6 +34,10 @@ export default function ProfileEditView() {
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       console.log('Formulario enviado con:', data);
+      toast({
+        title: "Perfil actualizado",
+        description: "Los cambios se han guardado correctamente",
+      });
       // Aquí puedes llamar a tu API de actualización de perfil
     } catch (error) {
       console.error('Error al enviar el formulario:', error);
@@ -47,7 +53,10 @@ export default function ProfileEditView() {
     <div className="max-w-4xl mx-auto space-y-8 px-4 py-10">
       <h1 className="text-3xl font-bold text-center">Editar perfil</h1>
 
-      <ProfileForm form={form} onSubmit={onSubmit} isSubmitting={false} onCancel={() => console.log('Cancelado')}>
+      <ProfileForm form={form} onSubmit={onSubmit} isSubmitting={false} onCancel={() => toast({
+        title: "Cambios cancelados",
+        description: "Los cambios no se han guardado",
+      })}>
         <AvatarSection control={form.control} />
         <BasicInfoSection control={form.control} />
         <SkillsSection 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
-import { Order } from '@/types/models'; // Adjusted to use the correct alias or relative path
+import { Order } from '@/types/artist';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 
@@ -33,17 +33,26 @@ export function useOrders(userId: string, options?: UseOrdersOptions): UseOrders
 
   // Funciones de fetching
   const fetchOrdersMade = useCallback(async (): Promise<Order[]> => {
-    const response = await apiRequest('GET', `/api/users/${userId}/orders/made`);
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/made`
+    });
     return await response.json();
   }, [userId]);
 
   const fetchOrdersReceived = useCallback(async (): Promise<Order[]> => {
-    const response = await apiRequest('GET', `/api/users/${userId}/orders/received`);
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/received`
+    });
     return await response.json();
   }, [userId]);
 
   const fetchOrdersAccepted = useCallback(async (): Promise<Order[]> => {
-    const response = await apiRequest('GET', `/api/users/${userId}/orders/accepted`);
+    const response = await apiRequest({
+      method: 'GET',
+      url: `/api/users/${userId}/orders/accepted`
+    });
     return await response.json();
   }, [userId]);
 
@@ -96,7 +105,10 @@ export function useOrders(userId: string, options?: UseOrdersOptions): UseOrders
   // Mutaciones para manejar órdenes
   const handleOrderAction = useCallback(async (orderId: string, action: 'accept' | 'reject') => {
     try {
-      await apiRequest('PATCH', `/api/orders/${orderId}/${action}`);
+      await apiRequest({
+        method: 'PATCH',
+        url: `/api/orders/${orderId}/${action}`
+      });
       return true;
     } catch (error) {
       console.error(`Error al ${action} la orden:`, error);

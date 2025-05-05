@@ -1,28 +1,38 @@
 // Muestra una grilla de productos utilizando el componente ProductCard
 
-import ProductCard from "./ProductCard";
-import { Product } from "../types";
+import { Product } from "../types.js";
+import ProductCard from "./ProductCard.jsx";
+import { GridList } from "../../../components/ui/GridList.jsx";
 
 interface ProductGridProps {
-  products: Product[]; // Lista de productos a mostrar
+  products: Product[];
+  onAddToCart?: (product: Product) => void;
+  onToggleFavorite?: (product: Product) => void;
+  favorites?: string[];
+  loading?: boolean;
 }
 
-const ProductGrid = ({ products }: ProductGridProps) => {
-  if (products.length === 0) {
-    return (
-      <p className="text-center text-gray-500 py-10">
-        No se encontraron productos.
-      </p>
-    );
-  }
-
+export default function ProductGrid({
+  products,
+  onAddToCart,
+  onToggleFavorite,
+  favorites = [],
+  loading = false,
+}: ProductGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <GridList
+      items={products}
+      renderItem={(product) => (
+        <ProductCard
+          product={product}
+          onAddToCart={onAddToCart}
+          onToggleFavorite={onToggleFavorite}
+          isFavorite={favorites.includes(product.id)}
+        />
+      )}
+      gridClassName="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      loading={loading}
+      emptyMessage="No hay productos disponibles"
+    />
   );
-};
-
-export default ProductGrid;
+}

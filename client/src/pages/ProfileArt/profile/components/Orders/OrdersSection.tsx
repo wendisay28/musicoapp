@@ -5,7 +5,7 @@ import { OrdersReceived } from './OrdersReceived';
 import { OrdersAccepted } from './OrdersAccepted';
 import { Suspense } from 'react';
 import { cn } from '@/lib/utils';
-import { Order } from '@/types/models';
+import { Order, OrderStatus } from '@/types/artist';
 
 // Tipo extendido para OrderCard
 export interface OrderCardOrder extends Order {
@@ -28,48 +28,39 @@ export function OrdersSection({
   const mockOrders: OrderCardOrder[] = [
     {
       id: '1',
-      clientId: 'user123',
+      userId: 'user123',
       artistId: 'artist456',
-      items: [
-        {
-          id: 'item1',
-          artworkId: 'art001',
-          title: 'Cuadro de gato abstracto',
-          price: 120,
-          quantity: 1,
-          imageUrl: '/images/art1.jpg'
-        }
-      ],
-      total: 120,
-      status: 'pending',
+      serviceId: 'service1',
+      status: OrderStatus.PENDING,
+      price: 120,
+      date: new Date().toISOString(),
+      location: {
+        city: 'Ciudad',
+        state: 'Estado',
+        country: 'País'
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      deliveryAddress: 'Calle Principal 123, Ciudad',
-      specialRequests: 'Favor usar tonos cálidos',
       userName: 'María González',
       artistName: 'Carlos Pintor',
       categoryName: 'Pintura Abstracta',
-      productId: 'art001' // Para compatibilidad con OrderCard
+      productId: 'art001'
     },
     {
       id: '2',
-      clientId: 'user456',
+      userId: 'user456',
       artistId: 'artist789',
-      items: [
-        {
-          id: 'item2',
-          artworkId: 'art002',
-          title: 'Escultura en madera',
-          price: 250,
-          quantity: 1,
-          imageUrl: '/images/art2.jpg'
-        }
-      ],
-      total: 250,
-      status: 'accepted',
+      serviceId: 'service2',
+      status: OrderStatus.CONFIRMED,
+      price: 250,
+      date: new Date(Date.now() - 86400000).toISOString(),
+      location: {
+        city: 'Ciudad',
+        state: 'Estado',
+        country: 'País'
+      },
       createdAt: new Date(Date.now() - 86400000).toISOString(),
       updatedAt: new Date().toISOString(),
-      deliveryAddress: 'Avenida Central 456, Ciudad',
       userName: 'Juan Pérez',
       artistName: 'Ana Escultora',
       categoryName: 'Escultura',

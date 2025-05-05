@@ -2,27 +2,40 @@
 // Barra lateral con categorías o enlaces a los artículos más populares
 
 import React from "react";
+import { Button } from "../../../components/ui/button.tsx";
 
 type BlogSidebarProps = {
-  categories: string[];
-  onSelectCategory: (category: string) => void;
+  onTagSelect: (tag: string) => void;
+  selectedTag?: string;
 };
 
-const BlogSidebar: React.FC<BlogSidebarProps> = ({ categories, onSelectCategory }) => {
+const BlogSidebar: React.FC<BlogSidebarProps> = ({ onTagSelect, selectedTag }) => {
+  // Ejemplo de tags (en una aplicación real, esto vendría de los posts)
+  const tags = [
+    "Arte Digital",
+    "Pintura",
+    "Escultura",
+    "Fotografía",
+    "Diseño",
+    "Consejos",
+    "Tutoriales"
+  ];
+
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">Categorías</h2>
-      <ul className="space-y-2">
-        {categories.map((category) => (
-          <li
-            key={category}
-            onClick={() => onSelectCategory(category)}
-            className="cursor-pointer text-blue-600 hover:underline"
+      <h3 className="font-semibold">Categorías</h3>
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <Button
+            key={tag}
+            variant={selectedTag === tag ? "default" : "outline"}
+            size="sm"
+            onClick={() => onTagSelect(tag)}
           >
-            {category}
-          </li>
+            {tag}
+          </Button>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
