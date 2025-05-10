@@ -44,7 +44,7 @@ const SearchIconComponent = SearchIcon as any;
 const MoreHorizontalComponent = MoreHorizontal as any;
 
 export function UserManagement(): JSX.Element {
-  const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<User[]>([]);
 
   const loadUsers = async (): Promise<void> => {
@@ -68,23 +68,23 @@ export function UserManagement(): JSX.Element {
   }, []);
 
   const handleSearch = (query: string): void => {
-    setSearchQuery(query);
+        setSearchQuery(query);
     // Implementar búsqueda real aquí
-  };
+    };
 
   const handleAction = (action: 'edit' | 'delete' | 'suspend', userId: string): void => {
-    switch (action) {
-      case 'edit':
+        switch (action) {
+            case 'edit':
         // lógica de edición
-        break;
-      case 'delete':
+                break;
+            case 'delete':
         // lógica de eliminación
-        break;
-      case 'suspend':
+                break;
+            case 'suspend':
         // lógica de suspensión
-        break;
-    }
-  };
+                break;
+        }
+    };
 
   return (
     <div className="space-y-4">

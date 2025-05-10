@@ -18,7 +18,7 @@ export function BusinessProfile(): JSX.Element {
         <p className="text-red-500">Error al cargar el perfil</p>
       </div>
     );
-  }
+    }
 
   if (!profile) {
     return (
@@ -26,7 +26,7 @@ export function BusinessProfile(): JSX.Element {
         <p className="text-muted-foreground">No se encontró el perfil</p>
       </div>
     );
-  }
+    }
 
   return (
     <div className="container mx-auto px-4 py-8">

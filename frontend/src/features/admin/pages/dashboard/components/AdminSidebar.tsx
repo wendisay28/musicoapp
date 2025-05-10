@@ -17,32 +17,32 @@ interface Section {
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps): JSX.Element {
   const { logout } = useAuth({});
   const sections: Section[] = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard
-    },
-    {
-      id: 'users',
-      label: 'Usuarios',
-      icon: Users
-    },
-    {
-      id: 'moderation',
-      label: 'Moderación',
-      icon: Shield
-    },
-    {
-      id: 'reports',
-      label: 'Reportes',
-      icon: BarChart
-    },
-    {
-      id: 'settings',
-      label: 'Configuración',
-      icon: Settings
-    }
-  ];
+        {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: LayoutDashboard
+        },
+        {
+            id: 'users',
+            label: 'Usuarios',
+            icon: Users
+        },
+        {
+            id: 'moderation',
+            label: 'Moderación',
+            icon: Shield
+        },
+        {
+            id: 'reports',
+            label: 'Reportes',
+            icon: BarChart
+        },
+        {
+            id: 'settings',
+            label: 'Configuración',
+            icon: Settings
+        }
+    ];
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200">
@@ -58,7 +58,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
               onClick={() => onSectionChange(section.id)}
               className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                 activeSection === section.id
-                  ? 'bg-gray-100 text-gray-900'
+                                ? 'bg-gray-100 text-gray-900'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >

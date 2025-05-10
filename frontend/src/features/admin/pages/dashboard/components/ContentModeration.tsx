@@ -43,7 +43,7 @@ const SearchIconComponent = SearchIcon as any;
 const MoreHorizontalComponent = MoreHorizontal as any;
 
 export function ContentModeration(): JSX.Element {
-  const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
 
   const loadReports = async (): Promise<void> => {
@@ -65,17 +65,17 @@ export function ContentModeration(): JSX.Element {
   }, []);
 
   const handleSearch = (query: string): void => {
-    setSearchQuery(query);
+        setSearchQuery(query);
     // Implementar búsqueda real aquí
-  };
+    };
 
   const handleAction = (action: 'approve' | 'reject' | 'delete', reportId: string): void => {
     const updatedReports = reports.map(report => {
       if (report.id === reportId) {
         switch (action) {
-          case 'approve':
+            case 'approve':
             return { ...report, status: 'resolved' };
-          case 'reject':
+            case 'reject':
             return { ...report, status: 'rejected' };
           case 'delete':
             return null;
