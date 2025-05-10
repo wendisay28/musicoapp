@@ -1,0 +1,21 @@
+/**
+ * Interfaz que representa una reseña
+ */
+export interface Review {
+  /** ID único de la reseña */
+  id: string;
+  /** ID del usuario que escribió la reseña */
+  userId: string;
+  /** Nombre del usuario que escribió la reseña */
+  userName: string;
+  /** Avatar del usuario */
+  userAvatar?: string;
+  /** Calificación (1-5) */
+  rating: number;
+  /** Comentario */
+  comment: string;
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de actualización */
+  updatedAt?: string;
+} 

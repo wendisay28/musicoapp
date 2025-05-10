@@ -1,0 +1,19 @@
+/**
+ * Representa una cuenta de red social
+ */
+export interface SocialMediaAccount {
+  platform: string;
+  username: string;
+  url?: string;
+  verified?: boolean;
+}
+
+/**
+ * Representa las redes sociales de un usuario
+ */
+export interface SocialMedia {
+  userId: string;
+  accounts: SocialMediaAccount[];
+  createdAt: string;
+  updatedAt: string;
+} 

@@ -1,0 +1,9 @@
+import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Card, CardContent } from '@/features/shared/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/features/shared/components/ui/dialog';
+import { useState } from 'react';
+export function ProfileGallery (props: any){ artworks }) {
+    const [selectedArtwork, setSelectedArtwork] = useState(null);
+    return (_jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", children: artworks.map((artwork) => (_jsxs(Dialog, { children: [_jsx(DialogTrigger, { asChild: true, children: _jsx(Card, { className: "cursor-pointer hover:shadow-lg transition-shadow", onClick: () => setSelectedArtwork(artwork), children: _jsxs(CardContent, { className: "p-0", children: [_jsx("div", { className: "aspect-square relative", children: _jsx("img", { src: artwork.imageUrl, alt: artwork.title, className: "object-cover w-full h-full rounded-t-lg" }) }), _jsxs("div", { className: "p-4", children: [_jsx("h3", { className: "font-semibold", children: artwork.title }), artwork.description && (_jsx("p", { className: "text-sm text-muted-foreground line-clamp-2 mt-1", children: artwork.description }))] })] }) }) }), _jsx(DialogContent, { className: "max-w-3xl", children: selectedArtwork && (_jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [_jsx("div", { className: "relative aspect-square", children: _jsx("img", { src: selectedArtwork.imageUrl, alt: selectedArtwork.title, className: "object-cover w-full h-full rounded-lg" }) }), _jsxs("div", { className: "space-y-4", children: [_jsx("h2", { className: "text-2xl font-bold", children: selectedArtwork.title }), selectedArtwork.description && (_jsx("p", { className: "text-muted-foreground", children: selectedArtwork.description }))] })] })) })] }, artwork.id))) }));
+}

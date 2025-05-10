@@ -1,0 +1,6 @@
+import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Button } from '@/features/shared/components/ui/button';
+export function OrderCard (props: any){ order, variant, onAccept, onReject, isProcessing, }) {
+    return (_jsxs("div", { className: "border rounded-xl p-4 shadow-sm bg-white space-y-2", children: [_jsxs("div", { className: "flex justify-between items-start", children: [_jsxs("div", { children: [_jsx("h3", { className: "text-lg font-semibold", children: order.title }), _jsx("p", { className: "text-sm text-muted-foreground", children: order.categoryName }), _jsxs("p", { className: "text-sm text-muted-foreground mt-1", children: ["Solicitante: ", order.userName] })] }), _jsxs("div", { className: "text-right", children: [_jsxs("p", { className: "text-sm font-medium", children: ["$", order.price] }), _jsx("p", { className: "text-xs text-muted-foreground", children: new Date(order.createdAt).toLocaleDateString() })] })] }), variant === 'received' && (_jsxs("div", { className: "flex gap-2 justify-end pt-2", children: [_jsx(Button, { variant: "outline", size: "sm", onClick: () => onReject?.(order.id), disabled: isProcessing, children: "Rechazar" }), _jsx(Button, { size: "sm", onClick: () => onAccept?.(order.id), disabled: isProcessing, children: "Aceptar" })] }))] }));
+}

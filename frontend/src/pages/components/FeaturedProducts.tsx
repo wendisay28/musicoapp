@@ -1,0 +1,6 @@
+import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+export function FeaturedProducts (props: any){ products }) {
+    return (_jsxs("section", { className: "py-12", children: [_jsx("h2", { className: "text-3xl font-bold mb-8", children: "Productos Destacados" }), _jsx("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", children: products.map((product) => (_jsxs(Card, { children: [_jsx(CardHeader, { children: _jsx(CardTitle, { children: product.title }) }), _jsxs(CardContent, { children: [_jsx("div", { className: "aspect-square relative mb-4", children: _jsx("img", { src: product.imageUrl, alt: product.title, className: "w-full h-full object-cover rounded-lg" }) }), _jsx("p", { className: "text-muted-foreground mb-2", children: product.description }), _jsxs("div", { className: "flex items-center justify-between", children: [_jsxs("span", { className: "text-lg font-semibold", children: ["$", product.price.toFixed(2)] }), _jsxs("span", { className: "text-sm text-muted-foreground", children: ["por ", product.artist.name] })] })] })] }, product.id))) })] }));
+}

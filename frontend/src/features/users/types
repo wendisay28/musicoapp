@@ -1,0 +1,71 @@
+import { SocialMedia } from './social';
+import { Service } from './service';
+import { Event } from './event';
+
+/**
+ * Interfaz que representa un usuario
+ */
+export interface User {
+  /** ID único del usuario */
+  id: string;
+  /** Nombre completo */
+  name: string;
+  /** Email */
+  email?: string;
+  /** Teléfono de contacto */
+  phone?: string;
+  /** Ubicación */
+  location?: string;
+  /** Descripción */
+  description?: string;
+  /** URL de la imagen de perfil */
+  profileImage?: string;
+  /** Tipo de usuario */
+  type: 'artist' | 'business';
+  /** Calificación promedio */
+  rating?: number;
+  /** Servicios */
+  services?: Service[];
+  /** Eventos */
+  events?: Event[];
+  /** Galería de imágenes */
+  gallery?: string[];
+  /** Reseñas */
+  reviews?: Review[];
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de última actualización */
+  updatedAt: string;
+}
+
+/**
+ * Interfaz que representa un usuario artista
+ */
+export interface ArtistUser extends User {
+  /** Nombre artístico */
+  artisticName: string;
+  /** Categorías o géneros artísticos */
+  categories: string[];
+  /** Etiquetas o habilidades */
+  tags: string[];
+  /** Calificación promedio */
+  rating: number;
+  /** Número de reseñas */
+  reviewCount: number;
+  /** Verificado */
+  verified: boolean;
+  /** Destacado */
+  featured: boolean;
+}
+
+export interface Review {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    profileImage?: string;
+  };
+  rating: number;
+  comment: string;
+  createdAt: string;
+} 

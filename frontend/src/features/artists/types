@@ -1,0 +1,178 @@
+import { Service } from './service';
+import { Review } from './review';
+import { Location } from './location';
+import { Availability } from './availability';
+import { SocialMedia } from './social';
+
+/**
+ * Interfaz que representa un artista en el sistema
+ */
+export interface Artist {
+  /** ID único del artista */
+  id: string;
+  /** Nombre del artista */
+  name: string;
+  /** Nombre para mostrar */
+  displayName?: string;
+  /** Biografía del artista */
+  bio?: string;
+  /** URL del avatar */
+  avatar?: string;
+  /** URL de la imagen de perfil (alias de avatar) */
+  photoURL?: string;
+  /** URL de la imagen de portada */
+  coverImage?: string;
+  /** Especialidades del artista */
+  specialties?: string[];
+  /** Rol o tipo de artista */
+  role?: string;
+  /** Servicios ofrecidos */
+  services?: Service[];
+  /** Reseñas recibidas */
+  reviews?: Review[];
+  /** Ubicación */
+  location?: Location;
+  /** Disponibilidad */
+  availability?: Availability;
+  /** Precio mínimo por servicio */
+  minPrice?: number;
+  /** Unidad de precio (por hora, por evento, etc.) */
+  priceUnit?: string;
+  /** Número de eventos realizados */
+  eventsCount: number;
+  /** Número de seguidores */
+  followersCount: number;
+  /** Calificación promedio */
+  rating: number;
+  /** Portafolio de trabajos */
+  portfolio?: MediaItem[];
+  /** Fecha de registro */
+  createdAt: string;
+  /** Fecha de última actualización */
+  updatedAt: string;
+  /** Años de experiencia */
+  experience?: number;
+  /** Información de contacto */
+  contactInfo?: ArtistContact;
+  /** Redes sociales */
+  socialMedia?: SocialMedia;
+}
+
+/**
+ * Datos del formulario de perfil de artista
+ */
+export interface ArtistProfileFormData {
+  /** Nombre del artista */
+  name: string;
+  /** Nombre para mostrar */
+  displayName?: string;
+  /** Biografía */
+  bio?: string;
+  /** Especialidades */
+  specialties?: string[];
+  /** Ubicación */
+  location?: Location;
+  /** Disponibilidad */
+  availability?: Availability;
+  /** Precio mínimo */
+  minPrice?: number;
+  /** Unidad de precio */
+  priceUnit?: string;
+  /** Años de experiencia */
+  experience?: number;
+  /** Información de contacto */
+  contactInfo?: ArtistContact;
+  /** Redes sociales */
+  socialMedia?: SocialMedia;
+}
+
+/**
+ * Datos para crear un nuevo artista
+ */
+export interface CreateArtistData {
+  /** Nombre del artista */
+  name: string;
+  /** Nombre para mostrar */
+  displayName?: string;
+  /** Biografía */
+  bio?: string;
+  /** Especialidades */
+  specialties?: string[];
+  /** Ubicación */
+  location?: Location;
+  /** Disponibilidad */
+  availability?: Availability;
+  /** Precio mínimo */
+  minPrice?: number;
+  /** Unidad de precio */
+  priceUnit?: string;
+  /** Años de experiencia */
+  experience?: number;
+  /** Información de contacto */
+  contactInfo?: ArtistContact;
+  /** Redes sociales */
+  socialMedia?: SocialMedia;
+}
+
+/**
+ * Datos para actualizar un artista
+ */
+export interface UpdateArtistData {
+  /** Nombre del artista */
+  name?: string;
+  /** Nombre para mostrar */
+  displayName?: string;
+  /** Biografía */
+  bio?: string;
+  /** Especialidades */
+  specialties?: string[];
+  /** Ubicación */
+  location?: Location;
+  /** Disponibilidad */
+  availability?: Availability;
+  /** Precio mínimo */
+  minPrice?: number;
+  /** Unidad de precio */
+  priceUnit?: string;
+  /** Años de experiencia */
+  experience?: number;
+  /** Información de contacto */
+  contactInfo?: ArtistContact;
+  /** Redes sociales */
+  socialMedia?: SocialMedia;
+}
+
+/**
+ * Interfaz para elementos multimedia (imágenes y videos)
+ * Se utiliza tanto para la galería como para el portafolio
+ */
+export interface MediaItem {
+  /** ID del elemento */
+  id: string;
+  /** Tipo de medio (imagen o video) */
+  type: 'image' | 'video';
+  /** URL del medio */
+  url: string;
+  /** Texto alternativo */
+  alt?: string;
+  /** Descripción */
+  description?: string;
+  /** Categoría o etiqueta */
+  category?: string;
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de actualización */
+  updatedAt?: string;
+}
+
+/**
+ * Información de contacto del artista
+ */
+export interface ArtistContact {
+  /** Email de contacto */
+  email?: string;
+  /** Teléfono de contacto */
+  phone?: string;
+  /** Sitio web */
+  website?: string;
+} 

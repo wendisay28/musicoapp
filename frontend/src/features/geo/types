@@ -1,0 +1,22 @@
+/**
+ * Interfaz que representa una ubicación
+ */
+export interface Location {
+  /** Dirección */
+  address: string;
+  /** Ciudad */
+  city: string;
+  /** Estado/Provincia */
+  state?: string;
+  /** País */
+  country: string;
+  /** Código postal */
+  postalCode?: string;
+  /** Coordenadas geográficas */
+  coordinates?: {
+    /** Latitud */
+    lat: number;
+    /** Longitud */
+    lng: number;
+  };
+} 

@@ -1,0 +1,96 @@
+/**
+ * Interfaz que representa un evento en el sistema
+ */
+export interface Event {
+  /** ID único del evento */
+  id: string;
+  /** Título del evento */
+  title: string;
+  /** Descripción del evento */
+  description: string;
+  /** Fecha y hora de inicio */
+  startDate: string;
+  /** Fecha y hora de fin */
+  endDate?: string;
+  /** Ubicación del evento */
+  location: string;
+  /** Precio del evento */
+  price: number;
+  /** Capacidad máxima de asistentes */
+  capacity: number;
+  /** Número de asistentes actuales */
+  attendeesCount: number;
+  /** Duración del evento */
+  duration: number;
+  /** Imágenes del evento */
+  images?: string[];
+  /** Categoría del evento */
+  category?: string;
+  /** Organizador del evento */
+  organizer: {
+    /** ID del organizador */
+    id: string;
+    /** Nombre del organizador */
+    name: string;
+    /** Imagen de perfil del organizador */
+    profileImage?: string;
+  };
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de última actualización */
+  updatedAt: string;
+}
+
+/**
+ * Datos del formulario de evento
+ */
+export interface EventFormData {
+  /** Título del evento */
+  title: string;
+  /** Descripción del evento */
+  description: string;
+  /** Fecha y hora de inicio */
+  startDate: string;
+  /** Fecha y hora de fin */
+  endDate: string;
+  /** Ubicación del evento */
+  location: string;
+  /** Categoría del evento */
+  category: string;
+  /** Precio del evento */
+  price: number;
+  /** Capacidad máxima de asistentes */
+  capacity: number;
+  /** Imágenes del evento */
+  images?: string[];
+  /** Etiquetas asociadas al evento */
+  tags?: string[];
+}
+
+/**
+ * Interfaz que representa una reserva de evento
+ */
+export interface EventReservation {
+  /** ID único de la reserva */
+  id: string;
+  /** ID del evento */
+  eventId: string;
+  /** ID del usuario que realiza la reserva */
+  userId: string;
+  /** Estado de la reserva */
+  status: 'pending' | 'confirmed' | 'cancelled';
+  /** Número de asistentes */
+  attendees: number;
+  /** Precio total */
+  totalPrice: number;
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de última actualización */
+  updatedAt: string;
+}
+
+export interface EventDetails {
+  event: Event;
+  loading: boolean;
+  error: string | null;
+} 

@@ -1,0 +1,65 @@
+/**
+ * Interfaz que representa un servicio en el sistema
+ */
+export interface Service {
+  /** ID único del servicio */
+  id: string;
+  /** Nombre del servicio */
+  name: string;
+  /** Descripción del servicio */
+  description: string;
+  /** Precio del servicio */
+  price: number;
+  /** Duración del servicio en minutos */
+  duration?: number;
+  /** Imágenes del servicio */
+  images?: string[];
+  /** Categoría del servicio */
+  category?: string;
+  /** Fecha de creación */
+  createdAt: string;
+  /** Fecha de última actualización */
+  updatedAt: string;
+}
+
+/**
+ * Datos para crear un nuevo servicio
+ */
+export interface CreateServiceData {
+  /** Nombre del servicio */
+  name: string;
+  /** Descripción del servicio */
+  description: string;
+  /** Precio del servicio */
+  price: number;
+  /** Duración del servicio en minutos */
+  duration: number;
+  /** ID del artista que ofrece el servicio */
+  artistId: string;
+  /** Categoría del servicio */
+  category: string;
+  /** Etiquetas asociadas al servicio */
+  tags?: string[];
+  /** Imágenes del servicio */
+  images?: string[];
+}
+
+/**
+ * Datos para actualizar un servicio
+ */
+export interface UpdateServiceData {
+  /** Nombre del servicio */
+  name?: string;
+  /** Descripción del servicio */
+  description?: string;
+  /** Precio del servicio */
+  price?: number;
+  /** Duración del servicio en minutos */
+  duration?: number;
+  /** Categoría del servicio */
+  category?: string;
+  /** Etiquetas asociadas al servicio */
+  tags?: string[];
+  /** Imágenes del servicio */
+  images?: string[];
+} 

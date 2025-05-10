@@ -1,0 +1,383 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import "../lib/animations.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 32 98% 50%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 180 100% 40%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 351 100% 50%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 265 100% 47%;
+    --chart-2: 180 100% 40%;
+    --chart-3: 351 100% 50%;
+    --chart-4: 41 100% 50%;
+    --chart-5: 130 100% 40%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 266 100% 60%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 178 100% 50%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 349 99% 62%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+/* Card elevation styles */
+@layer components {
+  .elevation-1 {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  }
+
+  .elevation-2 {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  }
+
+  .elevation-3 {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  }
+
+  .dark .elevation-1,
+  .dark .elevation-2,
+  .dark .elevation-3 {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Botones */
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply border border-orange-500 text-orange-500 hover:bg-orange-50 disabled:opacity-50;
+  }
+
+  /* Inputs */
+  .input {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500;
+  }
+
+  /* Tarjetas */
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow;
+  }
+
+  /* Badges */
+  .badge {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  /* Navegación móvil */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2;
+  }
+
+  /* Contenedor principal */
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Grid de ofertas */
+  .offers-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  /* Formulario de ofertas */
+  .offer-form {
+    @apply space-y-4;
+  }
+
+  .offer-form-group {
+    @apply space-y-1;
+  }
+
+  .offer-form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .offer-form-input {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500;
+  }
+
+  /* Loader */
+  .loader {
+    @apply animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500;
+  }
+
+  /* Mensajes */
+  .message {
+    @apply p-4 rounded-md;
+  }
+
+  .message-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .message-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  /* Detalle de oferta */
+  .offer-details {
+    @apply space-y-6;
+  }
+
+  .offer-details-header {
+    @apply flex justify-between items-start mb-6;
+  }
+
+  .offer-details-title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  .offer-details-content {
+    @apply space-y-4;
+  }
+
+  .offer-details-section {
+    @apply space-y-2;
+  }
+
+  .offer-details-label {
+    @apply font-medium text-gray-700;
+  }
+
+  .offer-details-value {
+    @apply text-gray-600;
+  }
+}
+
+/* Scrollbar styling */
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-foreground));
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-foreground));
+  }
+}
+
+:root {
+  --primary-color: #f97316;
+  --primary-hover: #ea580c;
+  --secondary-color: #1f2937;
+  --background-color: #f9fafb;
+  --text-color: #1f2937;
+  --text-light: #6b7280;
+  --border-color: #e5e7eb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+/* Estilos para botones */
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply border border-orange-500 text-orange-500 hover:bg-orange-50 disabled:opacity-50;
+}
+
+/* Estilos para inputs */
+.input {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500;
+}
+
+/* Estilos para tarjetas */
+.card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow;
+}
+
+/* Estilos para badges */
+.badge {
+  @apply px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-error {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Estilos para la navegación móvil */
+.mobile-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2;
+}
+
+/* Estilos para el contenedor principal */
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Estilos para el grid de ofertas */
+.offers-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* Estilos para el formulario de ofertas */
+.offer-form {
+  @apply space-y-4;
+}
+
+.offer-form-group {
+  @apply space-y-1;
+}
+
+.offer-form-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.offer-form-input {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500;
+}
+
+/* Estilos para el loader */
+.loader {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500;
+}
+
+/* Estilos para mensajes de error y éxito */
+.message {
+  @apply p-4 rounded-md;
+}
+
+.message-error {
+  @apply bg-red-100 text-red-800;
+}
+
+.message-success {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Estilos para el detalle de oferta */
+.offer-details {
+  @apply space-y-6;
+}
+
+.offer-details-header {
+  @apply flex justify-between items-start mb-6;
+}
+
+.offer-details-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.offer-details-content {
+  @apply space-y-4;
+}
+
+.offer-details-section {
+  @apply space-y-2;
+}
+
+.offer-details-label {
+  @apply font-medium text-gray-700;
+}
+
+.offer-details-value {
+  @apply text-gray-600;
+} 

@@ -1,0 +1,39 @@
+/**
+ * Interfaz que representa la disponibilidad de un artista
+ */
+export interface Availability {
+  /** Días de la semana disponibles */
+  days: {
+    /** Lunes */
+    monday?: TimeSlot[];
+    /** Martes */
+    tuesday?: TimeSlot[];
+    /** Miércoles */
+    wednesday?: TimeSlot[];
+    /** Jueves */
+    thursday?: TimeSlot[];
+    /** Viernes */
+    friday?: TimeSlot[];
+    /** Sábado */
+    saturday?: TimeSlot[];
+    /** Domingo */
+    sunday?: TimeSlot[];
+  };
+  /** Fechas específicas no disponibles */
+  blockedDates?: string[];
+  /** Fechas específicas disponibles */
+  availableDates?: string[];
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Interfaz que representa un horario disponible
+ */
+export interface TimeSlot {
+  /** Hora de inicio (formato HH:mm) */
+  start: string;
+  /** Hora de fin (formato HH:mm) */
+  end: string;
+} 

@@ -1,0 +1,7 @@
+import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Card, CardContent, CardHeader } from '@/features/ui/components/card';
+import { cn } from '@/lib/utils';
+export function EventInfoCard (props: any){ event, className }) {
+    return (_jsxs(Card, { className: cn('overflow-hidden', className), children: [_jsx(CardHeader, { className: "p-4", children: _jsx("h3", { className: "font-medium", children: "Informaci\u00F3n del Evento" }) }), _jsxs(CardContent, { className: "p-4 pt-0 space-y-4", children: [_jsxs("div", { children: [_jsx("p", { className: "text-sm font-medium", children: "Fecha y Hora" }), _jsx("p", { className: "text-sm text-muted-foreground", children: new Date(event.date).toLocaleString() })] }), _jsxs("div", { children: [_jsx("p", { className: "text-sm font-medium", children: "Ubicaci\u00F3n" }), _jsx("p", { className: "text-sm text-muted-foreground", children: event.location.address })] }), _jsxs("div", { children: [_jsx("p", { className: "text-sm font-medium", children: "Categor\u00EDa" }), _jsx("p", { className: "text-sm text-muted-foreground", children: event.category })] }), _jsxs("div", { children: [_jsx("p", { className: "text-sm font-medium", children: "Capacidad" }), _jsxs("p", { className: "text-sm text-muted-foreground", children: [event.attendees.length, " / ", event.capacity, " asistentes"] })] })] })] }));
+}

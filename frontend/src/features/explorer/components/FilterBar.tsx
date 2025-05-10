@@ -1,0 +1,19 @@
+import React from 'react';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from 'react';
+export const FilterBar: React.FC = ({ filters, onFilterChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const handleCategoryChange: React.FC = (category) => {
+        onFilterChange({ ...filters, category });
+    };
+    const handlePriceRangeChange: React.FC = (min, max) => {
+        onFilterChange({ ...filters, priceRange: { min, max } });
+    };
+    const handleSortChange: React.FC = (sortBy, sortOrder) => {
+        onFilterChange({ ...filters, sortBy, sortOrder });
+    };
+    const handleRadiusChange: React.FC = (radius) => {
+        onFilterChange({ ...filters, radius });
+    };
+    return (_jsxs("div", { className: "bg-white rounded-lg shadow p-4", children: [_jsxs("div", { className: "flex justify-between items-center mb-4", children: [_jsx("h3", { className: "text-lg font-semibold", children: "Filtros" }), _jsx("button", { onClick: () => setIsOpen(!isOpen), className: "text-primary hover:text-primary-dark", children: isOpen ? 'Ocultar' : 'Mostrar' })] }), isOpen && (_jsxs("div", { className: "space-y-4", children: [_jsxs("div", { children: [_jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Categor\u00EDa" }), _jsxs("select", { value: filters.category, onChange: (e) => handleCategoryChange(e.target.value), className: "w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary", children: [_jsx("option", { value: "", children: "Todas" }), _jsx("option", { value: "music", children: "M\u00FAsica" }), _jsx("option", { value: "art", children: "Arte" }), _jsx("option", { value: "theater", children: "Teatro" }), _jsx("option", { value: "dance", children: "Danza" }), _jsx("option", { value: "photography", children: "Fotograf\u00EDa" })] })] }), _jsxs("div", { children: [_jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Rango de precios" }), _jsxs("div", { className: "flex items-center space-x-4", children: [_jsx("input", { type: "number", value: filters.priceRange.min, onChange: (e) => handlePriceRangeChange(Number(e.target.value), filters.priceRange.max), className: "w-24 px-3 py-2 border rounded-lg focus:outline-none focus:border-primary", placeholder: "M\u00EDn" }), _jsx("span", { children: "-" }), _jsx("input", { type: "number", value: filters.priceRange.max, onChange: (e) => handlePriceRangeChange(filters.priceRange.min, Number(e.target.value)), className: "w-24 px-3 py-2 border rounded-lg focus:outline-none focus:border-primary", placeholder: "M\u00E1x" })] })] }), _jsxs("div", { children: [_jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Ordenar por" }), _jsxs("div", { className: "flex items-center space-x-4", children: [_jsxs("select", { value: filters.sortBy, onChange: (e) => handleSortChange(e.target.value, filters.sortOrder), className: "w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary", children: [_jsx("option", { value: "distance", children: "Distancia" }), _jsx("option", { value: "price", children: "Precio" }), _jsx("option", { value: "rating", children: "Calificaci\u00F3n" }), _jsx("option", { value: "createdAt", children: "Fecha" })] }), _jsx("button", { onClick: () => handleSortChange(filters.sortBy, filters.sortOrder === 'asc' ? 'desc' : 'asc'), className: "p-2 text-gray-500 hover:text-gray-700", children: filters.sortOrder === 'asc' ? '↑' : '↓' })] })] }), _jsxs("div", { children: [_jsxs("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: ["Radio de b\u00FAsqueda: ", filters.radius, " km"] }), _jsx("input", { type: "range", min: "1", max: "50", value: filters.radius, onChange: (e) => handleRadiusChange(Number(e.target.value)), className: "w-full" })] })] }))] }));
+};

@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ARTIST
+  BUSINESS
+  ADMIN
+}
+
+enum EventType {
+  VIRTUAL
+  IN_PERSON
+  COLLABORATIVE
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTER_OFFER
+  COMPLETED
+  CANCELLED
+}
+
+enum PostType {
+  BLOG
+  EVENT
+  OFFER
+  PRODUCT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  location      Json?     // { lat: number, lng: number, address: string }
+  phone         String?
+  bio           String?
+  
+  // Relaciones
+  artworks      Artwork[]
+  favorites     User[]    @relation("UserFavorites")
+  favoritedBy   User[]    @relation("UserFavorites")
+  comments      Comment[]
+  notifications Notification[]
+  posts         Post[]
+  events        Event[]
+  offers        Offer[]   @relation("CreatedOffers")
+  receivedOffers Offer[]  @relation("ReceivedOffers")
+  products      Product[]
+  artistProfile Artist?
+  businessProfile Business?
+}
+
+model Artist {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  bio           String?
+  specialties   String[]
+  hourlyRate    Float?
+  availability  Json?     // { days: string[], hours: { start: string, end: string }[] }
+  portfolio     String[]
+  events        Event[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Business {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  name          String
+  description   String?
+  type          String    // museum, theater, coworking, etc.
+  address       String
+  location      Json      // { lat: number, lng: number }
+  events        Event[]
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  type        EventType
+  startDate   DateTime
+  endDate     DateTime
+  location    Json?     // { lat: number, lng: number, address: string }
+  capacity    Int?
+  price       Float?
+  imageUrl    String?
+  isVirtual   Boolean   @default(false)
+  meetingLink String?
+  artistId    String?
+  artist      Artist?   @relation(fields: [artistId], references: [id])
+  businessId  String?
+  business    Business? @relation(fields: [businessId], references: [id])
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  attendees   User[]    @relation("EventAttendees")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Offer {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  type        String      // tipo de servicio requerido
+  location    Json        // { lat: number, lng: number, address: string }
+  budget      Float?
+  deadline    DateTime
+  status      OfferStatus @default(PENDING)
+  createdById String
+  createdBy   User        @relation("CreatedOffers", fields: [createdById], references: [id])
+  artistId    String?
+  artist      User?       @relation("ReceivedOffers", fields: [artistId], references: [id])
+  counterOffer Json?      // { price: number, message: string }
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  type        PostType
+  imageUrl    String?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  likes       Int       @default(0)
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  imageUrl    String
+  stock       Int?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  businessId  String?
+  business    Business? @relation(fields: [businessId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Artwork {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  artistId    String
+  artist      User      @relation(fields: [artistId], references: [id])
+  favorites   User[]    @relation("UserFavorites")
+  comments    Comment[]
+  tags        Tag[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id])
+  artworkId String?
+  artwork   Artwork? @relation(fields: [artworkId], references: [id])
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  artworks Artwork[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+} 
