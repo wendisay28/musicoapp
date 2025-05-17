@@ -1,67 +1,65 @@
-import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import type { ImgHTMLAttributes } from 'react';
 
-interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
-  className?: string;
   placeholder?: string;
+  sizes?: string;
+  srcSet?: string;
+  onImageError?: (error: string) => void;
 }
+
+const DEFAULT_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjwvc3ZnPg==';
 
 export function OptimizedImage({
   src,
   alt,
-  width,
-  height,
+  placeholder = DEFAULT_PLACEHOLDER,
+  sizes,
+  srcSet,
+  onImageError,
   className,
-  placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWUiLz48L3N2Zz4=',
   ...props
-}: OptimizedImageProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState(false);
+}: OptimizedImageProps): JSX.Element {
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const img = new Image();
-    img.src = src;
-    img.onload = () => setIsLoaded(true);
-    img.onerror = () => setError(true);
-  }, [src]);
+  const handleLoad = (): void => {
+    setIsLoaded(true);
+  };
+
+  const handleError = (): void => {
+    const errorMessage = 'Failed to load image';
+    setError(errorMessage);
+    setIsLoaded(false);
+    onImageError?.(errorMessage);
+  };
 
   if (error) {
     return (
-      <div
-        className={cn(
-          'flex items-center justify-center bg-gray-100 text-gray-400',
-          className
-        )}
-        style={{ width, height }}
+      <div 
+        role="alert" 
+        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        aria-live="polite"
       >
-        <span>Error loading image</span>
+        <strong className="font-bold">Error: </strong>
+        <span className="block sm:inline">{error}</span>
       </div>
     );
   }
 
   return (
-    <div
-      className={cn(
-        'relative overflow-hidden bg-gray-100',
-        !isLoaded && 'animate-pulse',
-        className
-      )}
-      style={{ width, height }}
-    >
-      <img
-        src={isLoaded ? src : placeholder}
-        alt={alt}
-        className={cn(
-          'h-full w-full object-cover transition-opacity duration-300',
-          !isLoaded && 'opacity-0'
-        )}
-        loading="lazy"
-        {...props}
-      />
-    </div>
+    <img
+      src={isLoaded ? src : placeholder}
+      alt={alt}
+      loading="lazy"
+      onLoad={handleLoad}
+      onError={handleError}
+      sizes={sizes}
+      srcSet={srcSet}
+      className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className || ''}`}
+      {...props}
+    />
   );
-} 
+}

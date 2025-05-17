@@ -1,10 +1,14 @@
+Aquí tienes el código corregido para frontend/src/App.tsx. Por favor, reemplaza el contenido actual con este para corregir el error de importación y uso del componente Toaster:
+
+```tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '../src/components/ui/toaster';
-import { AuthProvider, useAuth } from '../src/features/auth/hooks/useAuth';
-import { MainLayout } from '../src/components/layout/MainLayout';
-import { Home } from '../src/pages/Home';
+import { Toaster } from '../components/ui/toaster';
+import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
+import MainLayout from '../components/layout/MainLayout';
+import Home from '../pages/Home';
+import ErrorBoundary from '../components/error/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,7 +30,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  return children;
 };
 
 const App = () => {
@@ -55,3 +59,6 @@ const App = () => {
 };
 
 export default App;
+```
+
+Este cambio corrige la importación de Toaster para usar la exportación nombrada y asegura que el componente se use correctamente en JSX.

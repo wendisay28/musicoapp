@@ -1,22 +1,97 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '.prisma/client';
 import { AuthRequest } from '../middleware/auth';
 import { uploadImage, deleteImage } from '../services/storage.service';
+import logger from '../lib/logger';
+
+// Tipos
+interface ApiResponse {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  status: number;
+  meta?: {
+    total?: number;
+    pages?: number;
+    currentPage?: number;
+  };
+}
+
+interface CreateArtworkInput {
+  title: string;
+  description: string;
+  tags: string[];
+}
+
+interface UpdateArtworkInput extends Partial<CreateArtworkInput> {}
+
+interface ArtworkQueryParams {
+  page?: string;
+  limit?: string;
+  tag?: string;
+}
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const prisma = new PrismaClient();
 
 export const createArtwork = async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, tags } = req.body;
+    const { title, description, tags } = req.body as CreateArtworkInput;
     const artistId = req.user?.uid;
     const file = req.file;
 
+    // Validación básica
     if (!artistId) {
-      return res.status(401).json({ error: 'User not authenticated' });
+      logger.warn('Unauthorized artwork creation attempt');
+      const response: ApiResponse = {
+        success: false,
+        error: 'User not authenticated',
+        status: 401
+      };
+      return res.status(401).json(response);
+    }
+
+    if (!title || !description || !Array.isArray(tags)) {
+      logger.warn('Invalid artwork creation data', { artistId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Missing required fields',
+        status: 400
+      };
+      return res.status(400).json(response);
     }
 
     if (!file) {
-      return res.status(400).json({ error: 'No image file provided' });
+      logger.warn('No image file provided', { artistId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'No image file provided',
+        status: 400
+      };
+      return res.status(400).json(response);
+    }
+
+    // Validar tipo y tamaño de archivo
+    if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      logger.warn('Invalid file type', { artistId, mimetype: file.mimetype });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Invalid file type. Allowed types: JPEG, PNG, WebP',
+        status: 400
+      };
+      return res.status(400).json(response);
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      logger.warn('File too large', { artistId, size: file.size });
+      const response: ApiResponse = {
+        success: false,
+        error: 'File size exceeds 5MB limit',
+        status: 400
+      };
+      return res.status(400).json(response);
     }
 
     const imageUrl = await uploadImage(file);
@@ -29,33 +104,54 @@ export const createArtwork = async (req: AuthRequest, res: Response) => {
         artistId,
         tags: {
           connectOrCreate: tags.map((tag: string) => ({
-            where: { name: tag },
-            create: { name: tag },
+            where: { name: tag.trim().toLowerCase() },
+            create: { name: tag.trim().toLowerCase() },
           })),
         },
       },
       include: {
         artist: true,
         tags: true,
+        _count: {
+          select: {
+            favorites: true,
+            comments: true,
+          },
+        },
       },
     });
 
-    res.status(201).json(artwork);
+    logger.info('Artwork created successfully', { artworkId: artwork.id, artistId });
+    const response: ApiResponse = {
+      success: true,
+      data: artwork,
+      status: 201
+    };
+    res.status(201).json(response);
   } catch (error) {
-    console.error('Error creating artwork:', error);
-    res.status(500).json({ error: 'Error creating artwork' });
+    logger.error('Error creating artwork', { error, artistId: req.user?.uid });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Error creating artwork',
+      status: 500
+    };
+    res.status(500).json(response);
   }
 };
 
 export const getArtworks = async (req: Request, res: Response) => {
   try {
-    const { page = '1', limit = '10', tag } = req.query;
-    const skip = (Number(page) - 1) * Number(limit);
+    const { page = '1', limit = '10', tag } = req.query as ArtworkQueryParams;
+    
+    // Validar parámetros de paginación
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(50, Math.max(1, Number(limit))); // Máximo 50 items por página
+    const skip = (pageNum - 1) * limitNum;
 
     const where = tag ? {
       tags: {
         some: {
-          name: tag as string,
+          name: tag.toLowerCase(),
         },
       },
     } : {};
@@ -74,7 +170,7 @@ export const getArtworks = async (req: Request, res: Response) => {
           },
         },
         skip,
-        take: Number(limit),
+        take: limitNum,
         orderBy: {
           createdAt: 'desc',
         },
@@ -82,12 +178,17 @@ export const getArtworks = async (req: Request, res: Response) => {
       prisma.artwork.count({ where }),
     ]);
 
-    res.json({
-      artworks,
-      total,
-      pages: Math.ceil(total / Number(limit)),
-      currentPage: Number(page),
-    });
+    const response: ApiResponse = {
+      success: true,
+      data: artworks,
+      status: 200,
+      meta: {
+        total,
+        pages: Math.ceil(total / limitNum),
+        currentPage: pageNum
+      }
+    };
+    res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching artworks:', error);
     res.status(500).json({ error: 'Error fetching artworks' });
@@ -97,6 +198,16 @@ export const getArtworks = async (req: Request, res: Response) => {
 export const getArtwork = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!id) {
+      logger.warn('Get artwork attempt without ID');
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork ID is required',
+        status: 400
+      };
+      return res.status(400).json(response);
+    }
 
     const artwork = await prisma.artwork.findUnique({
       where: { id },
@@ -114,28 +225,66 @@ export const getArtwork = async (req: Request, res: Response) => {
         _count: {
           select: {
             favorites: true,
+            comments: true,
           },
         },
       },
     });
 
     if (!artwork) {
-      return res.status(404).json({ error: 'Artwork not found' });
+      logger.info('Artwork not found', { artworkId: id });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork not found',
+        status: 404
+      };
+      return res.status(404).json(response);
     }
 
-    res.json(artwork);
+    logger.info('Artwork fetched successfully', { artworkId: id });
+    const response: ApiResponse = {
+      success: true,
+      data: artwork,
+      status: 200
+    };
+    res.status(200).json(response);
   } catch (error) {
-    console.error('Error fetching artwork:', error);
-    res.status(500).json({ error: 'Error fetching artwork' });
+    logger.error('Error fetching artwork', { error, artworkId: req.params.id });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Error fetching artwork',
+      status: 500
+    };
+    res.status(500).json(response);
   }
 };
 
 export const updateArtwork = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, tags } = req.body;
+    const { title, description, tags } = req.body as UpdateArtworkInput;
     const userId = req.user?.uid;
     const file = req.file;
+
+    if (!userId) {
+      logger.warn('Unauthorized artwork update attempt');
+      const response: ApiResponse = {
+        success: false,
+        error: 'User not authenticated',
+        status: 401
+      };
+      return res.status(401).json(response);
+    }
+
+    if (!id) {
+      logger.warn('Update artwork attempt without ID', { userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork ID is required',
+        status: 400
+      };
+      return res.status(400).json(response);
+    }
 
     const artwork = await prisma.artwork.findUnique({
       where: { id },
@@ -143,15 +292,48 @@ export const updateArtwork = async (req: AuthRequest, res: Response) => {
     });
 
     if (!artwork) {
-      return res.status(404).json({ error: 'Artwork not found' });
+      logger.info('Artwork not found for update', { artworkId: id, userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork not found',
+        status: 404
+      };
+      return res.status(404).json(response);
     }
 
     if (artwork.artistId !== userId) {
-      return res.status(403).json({ error: 'Not authorized to update this artwork' });
+      logger.warn('Unauthorized artwork update attempt', { artworkId: id, userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Not authorized to update this artwork',
+        status: 403
+      };
+      return res.status(403).json(response);
     }
 
     let imageUrl = artwork.imageUrl;
     if (file) {
+      // Validar tipo y tamaño de archivo
+      if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+        logger.warn('Invalid file type in update', { userId, mimetype: file.mimetype });
+        const response: ApiResponse = {
+          success: false,
+          error: 'Invalid file type. Allowed types: JPEG, PNG, WebP',
+          status: 400
+        };
+        return res.status(400).json(response);
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        logger.warn('File too large in update', { userId, size: file.size });
+        const response: ApiResponse = {
+          success: false,
+          error: 'File size exceeds 5MB limit',
+          status: 400
+        };
+        return res.status(400).json(response);
+      }
+
       // Eliminar la imagen anterior
       await deleteImage(artwork.imageUrl);
       // Subir la nueva imagen
@@ -161,27 +343,46 @@ export const updateArtwork = async (req: AuthRequest, res: Response) => {
     const updatedArtwork = await prisma.artwork.update({
       where: { id },
       data: {
-        title,
-        description,
+        ...(title && { title }),
+        ...(description && { description }),
         imageUrl,
-        tags: {
-          set: [],
-          connectOrCreate: tags.map((tag: string) => ({
-            where: { name: tag },
-            create: { name: tag },
-          })),
-        },
+        ...(tags && {
+          tags: {
+            set: [],
+            connectOrCreate: tags.map((tag: string) => ({
+              where: { name: tag.trim().toLowerCase() },
+              create: { name: tag.trim().toLowerCase() },
+            })),
+          },
+        }),
       },
       include: {
         artist: true,
         tags: true,
+        _count: {
+          select: {
+            favorites: true,
+            comments: true,
+          },
+        },
       },
     });
 
-    res.json(updatedArtwork);
+    logger.info('Artwork updated successfully', { artworkId: id, userId });
+    const response: ApiResponse = {
+      success: true,
+      data: updatedArtwork,
+      status: 200
+    };
+    res.status(200).json(response);
   } catch (error) {
-    console.error('Error updating artwork:', error);
-    res.status(500).json({ error: 'Error updating artwork' });
+    logger.error('Error updating artwork', { error, artworkId: req.params.id, userId: req.user?.uid });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Error updating artwork',
+      status: 500
+    };
+    res.status(500).json(response);
   }
 };
 
@@ -190,17 +391,49 @@ export const deleteArtwork = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const userId = req.user?.uid;
 
+    if (!userId) {
+      logger.warn('Unauthorized artwork deletion attempt');
+      const response: ApiResponse = {
+        success: false,
+        error: 'User not authenticated',
+        status: 401
+      };
+      return res.status(401).json(response);
+    }
+
+    if (!id) {
+      logger.warn('Delete artwork attempt without ID', { userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork ID is required',
+        status: 400
+      };
+      return res.status(400).json(response);
+    }
+
     const artwork = await prisma.artwork.findUnique({
       where: { id },
       select: { artistId: true, imageUrl: true },
     });
 
     if (!artwork) {
-      return res.status(404).json({ error: 'Artwork not found' });
+      logger.info('Artwork not found for deletion', { artworkId: id, userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork not found',
+        status: 404
+      };
+      return res.status(404).json(response);
     }
 
     if (artwork.artistId !== userId) {
-      return res.status(403).json({ error: 'Not authorized to delete this artwork' });
+      logger.warn('Unauthorized artwork deletion attempt', { artworkId: id, userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Not authorized to delete this artwork',
+        status: 403
+      };
+      return res.status(403).json(response);
     }
 
     // Eliminar la imagen del almacenamiento
@@ -211,10 +444,20 @@ export const deleteArtwork = async (req: AuthRequest, res: Response) => {
       where: { id },
     });
 
-    res.status(204).send();
+    logger.info('Artwork deleted successfully', { artworkId: id, userId });
+    const response: ApiResponse = {
+      success: true,
+      status: 204
+    };
+    res.status(204).json(response);
   } catch (error) {
-    console.error('Error deleting artwork:', error);
-    res.status(500).json({ error: 'Error deleting artwork' });
+    logger.error('Error deleting artwork', { error, artworkId: req.params.id, userId: req.user?.uid });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Error deleting artwork',
+      status: 500
+    };
+    res.status(500).json(response);
   }
 };
 
@@ -224,7 +467,23 @@ export const toggleFavorite = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.uid;
 
     if (!userId) {
-      return res.status(401).json({ error: 'User not authenticated' });
+      logger.warn('Unauthorized favorite toggle attempt');
+      const response: ApiResponse = {
+        success: false,
+        error: 'User not authenticated',
+        status: 401
+      };
+      return res.status(401).json(response);
+    }
+
+    if (!id) {
+      logger.warn('Toggle favorite attempt without artwork ID', { userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork ID is required',
+        status: 400
+      };
+      return res.status(400).json(response);
     }
 
     const artwork = await prisma.artwork.findUnique({
@@ -235,11 +494,22 @@ export const toggleFavorite = async (req: AuthRequest, res: Response) => {
             id: userId,
           },
         },
+        _count: {
+          select: {
+            favorites: true,
+          },
+        },
       },
     });
 
     if (!artwork) {
-      return res.status(404).json({ error: 'Artwork not found' });
+      logger.info('Artwork not found for favorite toggle', { artworkId: id, userId });
+      const response: ApiResponse = {
+        success: false,
+        error: 'Artwork not found',
+        status: 404
+      };
+      return res.status(404).json(response);
     }
 
     const isFavorited = artwork.favorites.length > 0;
@@ -255,12 +525,32 @@ export const toggleFavorite = async (req: AuthRequest, res: Response) => {
       },
       include: {
         favorites: true,
+        _count: {
+          select: {
+            favorites: true,
+          },
+        },
       },
     });
 
-    res.json(updatedArtwork);
+    logger.info('Artwork favorite toggled successfully', { 
+      artworkId: id, 
+      userId, 
+      action: isFavorited ? 'unfavorited' : 'favorited' 
+    });
+    const response: ApiResponse = {
+      success: true,
+      data: updatedArtwork,
+      status: 200
+    };
+    res.status(200).json(response);
   } catch (error) {
-    console.error('Error toggling favorite:', error);
-    res.status(500).json({ error: 'Error toggling favorite' });
+    logger.error('Error toggling favorite', { error, artworkId: req.params.id, userId: req.user?.uid });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Error toggling favorite',
+      status: 500
+    };
+    res.status(500).json(response);
   }
 }; 

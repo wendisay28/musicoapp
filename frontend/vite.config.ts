@@ -6,8 +6,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/// <reference types="vitest" />
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react({
+    jsxRuntime: 'automatic',
+    jsxImportSource: 'react'
+  })],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -48,5 +53,11 @@ export default defineConfig({
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.webp'],
   define: {
     'process.env': process.env,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
   },
 }); 

@@ -1,25 +1,58 @@
-import React from 'react';
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Label } from '@/features/shared/components/ui/label';
 import { Calendar } from '@/features/shared/components/ui/calendar';
 import { Badge } from '@/features/shared/components/ui/badge';
-export function AvailabilityForm (props: any)) {
-    const { setValue, watch } = useFormContext();
-    const availability = watch('availability') || [];
-    const [selectedDate, setSelectedDate] = useState(null);
-    const toggleDate: React.FC = (date) => {
-        const dateStr = date.toISOString().split('T')[0];
-        const updated = availability.includes(dateStr)
-            ? availability.filter((d) => d !== dateStr)
-            : [...availability, dateStr];
-        setValue('availability', updated);
-    };
-    return (_jsxs("div", { className: "space-y-4", children: [_jsxs("div", { children: [_jsx(Label, { htmlFor: "availability", children: "Disponibilidad" }), _jsx("p", { className: "text-sm text-muted-foreground", children: "Selecciona las fechas en las que est\u00E1s disponible. Puedes hacer clic nuevamente para desmarcarlas." })] }), _jsx(Calendar, { mode: "single", selected: selectedDate || undefined, onSelect: (date) => {
-                    if (date) {
-                        setSelectedDate(date);
-                        toggleDate(date);
-                    }
-                } }), _jsx("div", { className: "flex flex-wrap gap-2", children: availability.map((dateStr) => (_jsx(Badge, { variant: "outline", children: dateStr }, dateStr))) })] }));
+
+type DateString = string; // formato YYYY-MM-DD
+
+interface AvailabilityFormProps {
+  defaultDates?: DateString[];
+  onChange?: (dates: DateString[]) => void;
+}
+
+export function AvailabilityForm({ defaultDates = [], onChange }: AvailabilityFormProps): JSX.Element {
+  const { setValue, watch } = useFormContext();
+  const availability: DateString[] = watch('availability') || defaultDates;
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const toggleDate = (date: Date): void => {
+    const dateStr = date.toISOString().split('T')[0];
+    const updated = availability.includes(dateStr)
+      ? availability.filter((d) => d !== dateStr)
+      : [...availability, dateStr].sort();
+    
+    setValue('availability', updated);
+    onChange?.(updated);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="availability">Disponibilidad</Label>
+        <p className="text-sm text-muted-foreground">
+          Selecciona las fechas en las que estás disponible. Puedes hacer clic nuevamente para desmarcarlas.
+        </p>
+      </div>
+      
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={(date: Date | null) => {
+          if (date) {
+            setSelectedDate(date);
+            toggleDate(date);
+          }
+        }}
+      />
+      
+      <div className="flex flex-wrap gap-2">
+        {availability.map((dateStr) => (
+          <Badge key={dateStr} variant="outline">
+            {dateStr}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -5,21 +5,26 @@ import { commentRoutes } from './comment';
 import { notificationRoutes } from './notification';
 import { offerRoutes } from './offer';
 
+// Tipos
+type Route = {
+  path: string;
+  router: Router;
+};
+
 const router = Router();
 
-// Rutas de autenticación
-router.use('/auth', authRoutes);
+// Definición de rutas con sus paths
+const routes: Route[] = [
+  { path: '/auth', router: authRoutes },
+  { path: '/artworks', router: artworkRoutes },
+  { path: '/comments', router: commentRoutes },
+  { path: '/notifications', router: notificationRoutes },
+  { path: '/offers', router: offerRoutes }
+];
 
-// Rutas de obras de arte
-router.use('/artworks', artworkRoutes);
+// Registrar todas las rutas
+routes.forEach(({ path, router: routeHandler }) => {
+  router.use(path, routeHandler);
+});
 
-// Rutas de comentarios
-router.use('/comments', commentRoutes);
-
-// Rutas de notificaciones
-router.use('/notifications', notificationRoutes);
-
-// Rutas de ofertas
-router.use('/offers', offerRoutes);
-
-export default router; 
+export default router;

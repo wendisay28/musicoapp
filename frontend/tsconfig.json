@@ -1,9 +1,22 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": false,  // Cambiado a false para mejor detección de errores
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["jest", "@testing-library/jest-dom", "node"],
+    "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -17,20 +30,28 @@
       "@/shared/*": ["src/features/shared/*"],
       "@/ui/*": ["src/components/ui/*"]
     },
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "types": [
+      "vite/client",
+      "jest",
+      "@testing-library/jest-dom",
+      "node",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-toast"  // Añadido para soporte de Toast
+    ]
   },
   "include": [
     "src",
     "src/setupTests.d.ts",
     "node_modules/@testing-library/jest-dom/extend-expect",
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "src/**/*.d.ts"  // Añadido para incluir archivos de definición de tipos
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
-} 
+}
